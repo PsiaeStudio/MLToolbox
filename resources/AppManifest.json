@@ -1,0 +1,15 @@
+{
+  "dev.psiae.mltoolbox.AppManifest": {
+    "manifestVersion": "0.1.0-alpha.1",
+    "manifestType": "AppManifest",
+    "data": {
+      "meta": {
+        "versioning": {
+          "type": "semver",
+          "versionNumber": "1.0.1-alpha.3",
+          "timestamp": 1760413610185
+        }
+      }
+    }
+  }
+}

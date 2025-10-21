@@ -16,7 +16,11 @@
 -keep class kotlinx.** {*;}
 -keep class java.** {*;}
 
+-dontwarn kotlinx.datetime.**
+
 -keep class net.sf.sevenzipjbinding.** {*;}
+
+-keep class org.sqlite.** { *; }
 
 #keep runtime annotation for JNA
 -keepattributes RuntimeVisibleAnnotations

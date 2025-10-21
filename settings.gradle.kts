@@ -18,4 +18,4 @@ plugins {
 }
 
 
-rootProject.name = "MLToolBox"
+rootProject.name = "MLToolbox"

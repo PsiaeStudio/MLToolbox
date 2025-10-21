@@ -1,1 +1,1 @@
-suspend fun main(args: Array<String>) = dev.psiae.mltoolbox.main(args)
+fun main(args: Array<String>) = dev.psiae.mltoolbox.main(args)
