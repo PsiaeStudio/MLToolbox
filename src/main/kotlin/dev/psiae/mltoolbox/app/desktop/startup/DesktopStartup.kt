@@ -252,6 +252,7 @@ object  DesktopStartup {
         Logger.log("")
         Logger.log("MLToolbox.exe launched")
         Logger.log("args: ${args.contentToString()}")
+        Logger.log("version: ${MLToolboxApp.RELEASE_VERSION}")
         Logger.log("")
         Logger.log("~~~~~~~~~~~~~~~~~~~~")
         Logger.log("\n\n")

@@ -86,15 +86,34 @@ class LauncherScreenState(
         val gameLauncherFile = modManagerScreenState.gameLauncherFile ?: return
         val gameBinaryFile = modManagerScreenState.gameBinaryFile ?: return
         val gamePaksFolder = modManagerScreenState.gamePaksFolder ?: return
+        val gameVersion = modManagerScreenState.gameVersion.ifBlank { null } ?: return
         launching = true
         launchingErr = false
         launchingErrMsg = ""
         coroutineScope.launch {
             launchingStatusMsg = "Launching ..."
-            withContext(Dispatchers.IO) {
-                modManagerScreenState.requireGameLauncherFile().absolutePath.let {
-                    Runtime.getRuntime().exec(it)
+            runCatching {
+                val exe = when (selectedPlatform) {
+                    "steam", "epic_games_store", "gog_com" -> {
+                        if (gameVersion == "0.8.029a")
+                            gameBinaryFile
+                        else
+                            gameLauncherFile
+                    }
+                    "xbox_pc_gamepass" -> gameLauncherFile
+                    else -> error("Unknown platform: $selectedPlatform")
                 }
+                withContext(Dispatchers.IO) {
+                    val processBuilder = ProcessBuilder("cmd.exe", "/c", "start", "", exe.absolutePath)
+                    processBuilder.start()
+                }
+            }.onFailure { t ->
+                if (t is IOException) {
+                    launchingErr = true
+                    launchingErrMsg = "Could not start game process (IO Error)"
+                    return@launch
+                }
+                throw t
             }
             launching = false
         }
@@ -176,6 +195,7 @@ class LauncherScreenState(
         val gameLauncherFile = modManagerScreenState.gameLauncherFile ?: return
         val gameBinaryFile = modManagerScreenState.gameBinaryFile ?: return
         val gamePaksFolder = modManagerScreenState.gamePaksFolder ?: return
+        val gameVersion = modManagerScreenState.gameVersion.ifBlank { null } ?: return
         launching = true
         launchingErr = false
         launchingErrMsg = ""
@@ -205,7 +225,7 @@ class LauncherScreenState(
 
                 val gameRoot = gameRootFolder.absolutePath
                 val pakModsDir = jFile("$gameRoot\\Content\\Paks\\~mods")
-                if (pakModsDir.exists()) {
+                if (pakModsDir.isDirectory) {
                     if (!pakModsDir.toPath().deleteRecursivelyBool()) {
                         launchingErr = true
                         launchingErrMsg = "Could not delete ${jFile(gameRoot).name}\\Content\\Paks\\~mods directory recursively"
@@ -214,7 +234,7 @@ class LauncherScreenState(
                 }
 
                 val logicModsDir = jFile("$gameRoot\\Content\\Paks\\LogicMods")
-                if (logicModsDir.exists()) {
+                if (logicModsDir.isDirectory) {
                     if (!logicModsDir.toPath().deleteRecursivelyBool()) {
                         launchingErr = true
                         launchingErrMsg = "Could not delete ${jFile(gameRoot).name}\\Content\\Paks\\LogicMods directory recursively"
@@ -223,10 +243,18 @@ class LauncherScreenState(
                 }
 
                 val process = runCatching {
-                    gameBinaryFile.let {
-                        val processBuilder = ProcessBuilder("cmd.exe", "/c", "start", "", it.absolutePath)
-                        processBuilder.start()
+                    val exe = when (selectedPlatform) {
+                        "steam", "epic_games_store", "gog_com" -> {
+                            if (gameVersion == "0.8.029a")
+                                gameBinaryFile
+                            else
+                                gameLauncherFile
+                        }
+                        "xbox_pc_gamepass" -> gameLauncherFile
+                        else -> error("Unknown platform: $selectedPlatform")
                     }
+                    val processBuilder = ProcessBuilder("cmd.exe", "/c", "start", "", exe.absolutePath)
+                    processBuilder.start()
                 }.onFailure { e ->
                     if (e is IOException) {
                         launchingErr = true

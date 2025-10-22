@@ -13,7 +13,7 @@ class MLToolboxApp {
         private val INSTANCE = LazyConstructor<MLToolboxApp>()
         private val EXE_PATH = LazyConstructor<String>()
 
-        const val RELEASE_VERSION = "1.0.1-alpha.3"
+        const val RELEASE_VERSION = "1.0.1-alpha.4"
         const val APP_ID = "dev.psiae.mltoolbox"
         const val APP_DIR = "MLToolboxApp"
 

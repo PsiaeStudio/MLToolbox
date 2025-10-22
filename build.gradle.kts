@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "dev.psiae"
-version = "1.0.1-alpha.3"
+version = "1.0.1-alpha.4"
 
 repositories {
     mavenCentral()
