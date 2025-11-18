@@ -52,7 +52,6 @@ fun DirectInstallModScreen(
                 ) {
                     Box(
                         modifier = Modifier
-                            .height(64.dp)
                             .fillMaxWidth()
                             .background(
                                 color = MD3Theme.surfaceColorAtElevation(
@@ -62,40 +61,51 @@ fun DirectInstallModScreen(
                                 )
                             )
                     ) {
-                        Row(
-                            modifier = Modifier.padding(16.dp).align(Alignment.CenterStart),
-                            verticalAlignment = Alignment.CenterVertically
+                        Column(
+                            Modifier.padding(bottom = 12.dp)
                         ) {
-                            SimpleTooltip(
-                                "go back"
+                            Row(
+                                modifier = Modifier,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .clickable(onClick = { state.userInputExit() })
-                                        .padding(vertical = 4.dp, horizontal = 4.dp)
+                                SimpleTooltip(
+                                    "go back"
                                 ) {
-                                    Icon(
-                                        modifier = Modifier.size(20.dp),
-                                        painter = painterResource("drawable/arrow_left_simple_32px.png"),
-                                        tint = Material3Theme.colorScheme.onSurface,
-                                        contentDescription = null
-                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .size(48.dp)
+                                    ) {
+                                        Box (
+                                            modifier = Modifier
+                                                .align(Alignment.Center)
+                                                .clickable(onClick = { state.userInputExit() })
+                                                .padding(2.dp)
+                                        ) {
+                                            Icon(
+                                                modifier = Modifier.size(24.dp),
+                                                painter = painterResource("drawable/arrow_left_simple_32px.png"),
+                                                tint = Material3Theme.colorScheme.onSurface,
+                                                contentDescription = null
+                                            )
+                                        }
+                                    }
                                 }
                             }
-
-                            WidthSpacer(16.dp)
-
-                            Row {
+                            Row(
+                                modifier = Modifier
+                                    .padding(start = 16.dp)
+                            ) {
                                 Text(
-                                    "Install mod",
-                                    style = Material3Theme.typography.headlineSmall.copy(
-                                        baselineShift = BaselineShift(-0.1f)
-                                    ),
+                                    "Install Mod",
+                                    style = Material3Theme.typography.headlineMedium,
                                     color = Material3Theme.colorScheme.onSurface
                                 )
                             }
                         }
                     }
+
+                    HeightSpacer(16.dp)
+
                     Row {
                         Column(
                             modifier = Modifier
@@ -103,13 +113,14 @@ fun DirectInstallModScreen(
                                 .padding(horizontal = 16.dp)
                                 .verticalScroll(state = scrollState)
                         ) {
+                            HeightSpacer(12.dp)
                             Text(
-                                "Supported mod loaders",
+                                "Supported Mod Loaders",
                                 style = Material3Theme.typography.titleLarge,
                                 color = Material3Theme.colorScheme.onSurface,
                                 maxLines = 1
                             )
-                            HeightSpacer(12.dp)
+                            HeightSpacer(16.dp)
                             Column(
                                 modifier = Modifier.padding(horizontal = 8.dp)
                             ) {
@@ -182,29 +193,62 @@ private fun REUE4SSModLoaderCard(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    "RE-UE4SS",
-                    style = Material3Theme.typography.titleMedium.copy(
-                        baselineShift = BaselineShift(-0.1f)
-                    ),
-                    color = Material3Theme.colorScheme.onSurface,
-                    maxLines = 1
-                )
-                run {
-                    val uriHandler = LocalUriHandler.current
-                    val coroutineScope = rememberCoroutineScope()
-                    Icon(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clickable { coroutineScope.launch(Dispatchers.IO) { uriHandler.openUri("https://github.com/UE4SS-RE/RE-UE4SS") } }
-                            .padding(4.dp),
-                        painter = painterResource("drawable/icon_navigate_redirect_24px.png"),
-                        tint = Material3Theme.colorScheme.primary,
-                        contentDescription = null
+                Row {
+                    Text(
+                        "MLUE4SS",
+                        style = Material3Theme.typography.titleMedium,
+                        color = Material3Theme.colorScheme.onSurface,
+                        maxLines = 1
                     )
+                    run {
+                        val uriHandler = LocalUriHandler.current
+                        Icon(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clickable {
+                                    // Change to https://psiae.fun when mod-page is ready, we only have chBeta there
+                                    uriHandler.openUri("https://www.nexusmods.com/manorlords/mods/229")
+                                }
+                                .padding(4.dp),
+                            painter = painterResource("drawable/icon_navigate_redirect_24px.png"),
+                            tint = Material3Theme.colorScheme.primary,
+                            contentDescription = null
+                        )
+                    }
+                }
+                Text(
+                    "|",
+                    style = Material3Theme.typography.titleMedium.copy(baselineShift = BaselineShift(-0.1f)),
+                    color = Material3Theme.colorScheme.onSurface,
+                    maxLines = 1,
+                    modifier = Modifier.padding(horizontal = 3.dp)
+                )
+                WidthSpacer(4.dp)
+                Row {
+                    Text(
+                        "RE-UE4SS",
+                        style = Material3Theme.typography.titleMedium,
+                        color = Material3Theme.colorScheme.onSurface,
+                        maxLines = 1
+                    )
+                    run {
+                        val uriHandler = LocalUriHandler.current
+                        val coroutineScope = rememberCoroutineScope()
+                        Icon(
+                            modifier = Modifier
+                                .size(24.dp)
+                                .clickable {
+                                    uriHandler.openUri("https://github.com/UE4SS-RE/RE-UE4SS")
+                                }
+                                .padding(4.dp),
+                            painter = painterResource("drawable/icon_navigate_redirect_24px.png"),
+                            tint = Material3Theme.colorScheme.primary,
+                            contentDescription = null
+                        )
+                    }
                 }
             }
-            HeightSpacer(4.dp)
+            HeightSpacer(8.dp)
             HorizontalDivider(
                 modifier = Modifier.width((480-48).dp),
                 thickness = 1.dp,
@@ -230,45 +274,46 @@ private fun REUE4SSModLoaderCard(
 
             }
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(
-                    modifier = Modifier
-                        .height(36.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(Color.Transparent)
-                        .clickable { state.userInputNavigateToInstallUE4SSMod() }
-                        .padding(vertical = 6.dp, horizontal = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        "Install Mod",
-                        style = Material3Theme.typography.labelLarge.copy(
-                            baselineShift = BaselineShift(-0.1f)
-                        ),
-                        color = Material3Theme.colorScheme.primary,
-                        maxLines = 1
-                    )
+                if (state.isUe4ssInstalled) {
+                    Row(
+                        modifier = Modifier
+                            .height(40.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .border(1.dp, Material3Theme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
+                            .clickable { state.userInputNavigateToInstallUE4SSMod() }
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            "Install Mod",
+                            style = Material3Theme.typography.labelLarge,
+                            color = Material3Theme.colorScheme.onSurfaceVariant,
+                            maxLines = 1
+                        )
+                    }
+                    WidthSpacer(8.dp)
                 }
-                WidthSpacer(8.dp)
+
                 Row(
                     modifier = Modifier
                         .height(40.dp)
-                        .defaultMinSize(minWidth = 120.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(Material3Theme.colorScheme.primary)
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(1.dp, Material3Theme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
                         .clickable { state.userInputNavigateToInstallUE4SS() }
-                        .padding(vertical = 6.dp, horizontal = 16.dp),
+                        .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
-                        "Install Mod Loader",
-                        style = Material3Theme.typography.labelLarge.copy(
-                            baselineShift = BaselineShift(-0.1f)
-                        ),
-                        color = Material3Theme.colorScheme.onPrimary,
+                        text = if (state.isUe4ssInstalled)
+                            "Update"
+                        else
+                            "Install",
+                        style = Material3Theme.typography.labelLarge,
+                        color = Material3Theme.colorScheme.onSurfaceVariant,
                         maxLines = 1
                     )
                 }
@@ -303,19 +348,18 @@ private fun UnrealEngineModLoaderCard(
             ) {
                 Text(
                     "Unreal Engine Pak Patcher",
-                    style = Material3Theme.typography.titleMedium.copy(
-                        baselineShift = BaselineShift(-0.1f)
-                    ),
+                    style = Material3Theme.typography.titleMedium,
                     color = Material3Theme.colorScheme.onSurface,
                     maxLines = 1
                 )
                 run {
                     val uriHandler = LocalUriHandler.current
-                    val coroutineScope = rememberCoroutineScope()
                     Icon(
                         modifier = Modifier
                             .size(24.dp)
-                            .clickable { coroutineScope.launch(Dispatchers.IO) { uriHandler.openUri("https://dev.epicgames.com/documentation/en-us/unreal-engine/patching-content-delivery-and-dlc-in-unreal-engine") } }
+                            .clickable {
+                                uriHandler.openUri("https://dev.epicgames.com/documentation/en-us/unreal-engine/patching-content-delivery-and-dlc-in-unreal-engine")
+                            }
                             .padding(4.dp),
                         painter = painterResource("drawable/icon_navigate_redirect_24px.png"),
                         tint = Material3Theme.colorScheme.primary,
@@ -331,15 +375,13 @@ private fun UnrealEngineModLoaderCard(
                 ) {
                     Text(
                         "Built-in",
-                        style = Material3Theme.typography.bodySmall.copy(
-                            baselineShift = BaselineShift(-0.1f)
-                        ),
+                        style = Material3Theme.typography.bodySmall,
                         color = Material3Theme.colorScheme.onTertiary,
                         maxLines = 1
                     )
                 }
             }
-            HeightSpacer(4.dp)
+            HeightSpacer(8.dp)
             HorizontalDivider(
                 modifier = Modifier.width((480-48).dp),
                 thickness = 1.dp,
@@ -371,22 +413,18 @@ private fun UnrealEngineModLoaderCard(
                     val enabled = true
                     Row(
                         modifier = Modifier
-                            .height(36.dp)
-                            .clip(RoundedCornerShape(50))
-                            .background(Color.Transparent)
+                            .height(40.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .border(1.dp, Material3Theme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
                             .clickable(enabled = enabled) { state.userInputNavigateToInstallUnrealEngineMod() }
-                            .padding(vertical = 6.dp, horizontal = 12.dp),
+                            .padding(horizontal = 16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Text(
                             "Install Mod",
-                            style = Material3Theme.typography.labelLarge.copy(
-                                baselineShift = BaselineShift(-0.1f)
-                            ),
-                            color = Material3Theme.colorScheme.primary.copy(
-                                alpha = if (enabled) 1f else 0.38f
-                            ),
+                            style = Material3Theme.typography.labelLarge,
+                            color = Material3Theme.colorScheme.onSurfaceVariant,
                             maxLines = 1
                         )
                     }
@@ -396,20 +434,18 @@ private fun UnrealEngineModLoaderCard(
                 Row(
                     modifier = Modifier
                         .height(40.dp)
-                        .defaultMinSize(minWidth = 120.dp)
-                        .clip(RoundedCornerShape(50))
-                        .background(Material3Theme.colorScheme.onSurface.copy(alpha = 0.16f))
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(1.dp, Material3Theme.colorScheme.outlineVariant, RoundedCornerShape(12.dp))
+                        .background(Material3Theme.colorScheme.onSurface.copy(alpha = 0.1f))
                         .clickable(enabled = false) {  }
-                        .padding(vertical = 6.dp, horizontal = 12.dp),
+                        .padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Text(
                         "Installed",
-                        style = Material3Theme.typography.labelLarge.copy(
-                            baselineShift = BaselineShift(-0.1f)
-                        ),
-                        color = Material3Theme.colorScheme.onSurface.copy(alpha = 0.38f),
+                        style = Material3Theme.typography.labelLarge,
+                        color = Material3Theme.colorScheme.onSurfaceVariant.copy(alpha = 0.38f),
                         maxLines = 1
                     )
                 }

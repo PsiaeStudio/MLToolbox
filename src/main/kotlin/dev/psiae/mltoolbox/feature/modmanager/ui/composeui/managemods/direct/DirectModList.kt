@@ -45,8 +45,10 @@ fun DirectModList(
     screenState: ManageDirectModsScreenState
 ) {
     val state = rememberDirectModListState(screenState)
-    Column(modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth()) {
-        Row(modifier = Modifier.align(Alignment.CenterHorizontally).padding(horizontal = 4.dp, vertical = 8.dp)) { DirectModsQuerySearchBarPanel(state) }
+    Column(modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
+        HeightSpacer(8.dp)
+        Row(modifier = Modifier.align(Alignment.CenterHorizontally).padding(horizontal = 4.dp, vertical = 4.dp)) { DirectModsQuerySearchBarPanel(state) }
+        HeightSpacer(4.dp)
         DirectModListLazyColumn(state)
     }
 }
@@ -59,7 +61,8 @@ private fun DirectModListLazyColumn(modListState: DirectModListState) {
             modifier = Modifier
                 .weight(1f, false)
                 .fillMaxSize(),
-            state = scrollState
+            state = scrollState,
+            contentPadding = PaddingValues(vertical = 12.dp)
         ) {
             val list = if (modListState.queryParamsEnabled)
                 modListState.queriedInstalledModList
@@ -146,6 +149,11 @@ private fun DirectModListLazyColumn(modListState: DirectModListState) {
                 if (i < list.lastIndex)
                     HeightSpacer(16.dp)
             }
+            /*item(
+                key = "bottomContentPadding"
+            ) {
+                HeightSpacer(12.dp)
+            }*/
         }
         WidthSpacer(4.dp)
         VerticalScrollbar(
@@ -289,7 +297,10 @@ private fun DirectModsQuerySearchBar(
     }
     val ins = remember { MutableInteractionSource() }
 
-    val surfaceColor = Material3Theme.colorScheme.surfaceContainerHigh
+    val surfaceColor = if (LocalIsDarkTheme.current)
+        Material3Theme.colorScheme.surfaceContainerHigh
+    else
+        Material3Theme.colorScheme.surfaceBright
     val colors = TextFieldDefaults.colors(
         focusedContainerColor = surfaceColor,
         unfocusedContainerColor = surfaceColor,

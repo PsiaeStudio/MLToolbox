@@ -58,13 +58,13 @@ fun ManageDirectModsContent(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
                     .padding(16.dp)
-                    .border(
+                    /*.border(
                         width = 1.dp,
                         color = Material3Theme.colorScheme.outlineVariant,
                         shape = RoundedCornerShape(12.dp)
-                    )
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Material3Theme.colorScheme.surfaceContainer, RoundedCornerShape(12.dp))
+                    )*/
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Material3Theme.colorScheme.surfaceContainer, RoundedCornerShape(8.dp))
                     .defaultSurfaceGestureModifiers(),
             ) {
                 var width by remember {
@@ -84,7 +84,6 @@ fun ManageDirectModsContent(
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
-                                .background(Material3Theme.colorScheme.surfaceContainer)
                                 .defaultSurfaceGestureModifiers()
                         ) {
                             DirectModList(state)
@@ -177,12 +176,12 @@ private fun PrimarySection(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .border(
+                /*.border(
                     width = 1.dp,
                     color = Material3Theme.colorScheme.outlineVariant,
-                    shape = RoundedCornerShape(12.dp)
-                )
-                .clip(RoundedCornerShape(12.dp))
+                    shape = RoundedCornerShape(8.dp)
+                )*/
+                .clip(RoundedCornerShape(8.dp))
                 .background(Material3Theme.colorScheme.surfaceContainer)
                 .defaultSurfaceGestureModifiers()
                 .padding(12.dp),

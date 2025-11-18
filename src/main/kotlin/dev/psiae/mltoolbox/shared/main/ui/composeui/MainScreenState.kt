@@ -9,16 +9,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import dev.psiae.mltoolbox.shared.logger.Logger
 import dev.psiae.mltoolbox.shared.ui.composeui.core.ComposeUIContext
 import dev.psiae.mltoolbox.shared.ui.composeui.core.locals.LocalComposeUIContext
 import dev.psiae.mltoolbox.shared.user.data.model.UserProfile
 import dev.psiae.mltoolbox.shared.user.data.model.UserProfileSetting
 import dev.psiae.mltoolbox.shared.user.domain.UserService
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.launch
@@ -102,27 +101,38 @@ class MainScreenState(
             userService.observeCurrentUserProfile()
                 .dropWhile { it == null }
                 .collectLatest { profile ->
-                    this@MainScreenState.apply {
+                    updateState {
                         userProfile = profile
                         userProfileSetting = null
                     }
                 }
         }
         coroutineScope.launch {
+            var latestProfileCollector: Job? = null
             snapshotFlow { userProfile }
                 .dropWhile { it == null }
                 .collectLatest { profile ->
-                    if (profile != null) {
-                        userService.observeUserProfileSetting(profile.uuid.toString())
-                            .collectLatest { setting ->
-                                this@MainScreenState.apply {
-                                    if (userProfile?.id == profile.id) {
-                                        userProfileSetting = setting
+                    latestProfileCollector?.cancel()
+                    latestProfileCollector = null
+                    profile?.let {
+                        latestProfileCollector = coroutineScope.launch {
+                            userService.observeUserProfileSetting(profile.uuid.toString())
+                                .collectLatest { setting ->
+                                    updateState {
+                                        if (userProfile?.id == profile.id) {
+                                            userProfileSetting = setting
+                                        }
                                     }
                                 }
-                            }
+                        }
                     }
                 }
         }
+    }
+
+    private inline fun updateState(
+        block: MainScreenState.() -> Unit
+    ) {
+        block()
     }
 }

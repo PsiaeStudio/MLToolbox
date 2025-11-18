@@ -42,11 +42,11 @@ object  DesktopStartup {
     private fun getMainClzPath(): String {
         return try {
             val anchor = Main::class.java
-            val uri: URI = anchor.getProtectionDomain().getCodeSource().getLocation().toURI()
+            val uri: URI = anchor.protectionDomain.codeSource.location.toURI()
             var p: Path = Paths.get(uri)
 
             // JAR
-            if (Files.isRegularFile(p)) p = p.getParent()
+            if (Files.isRegularFile(p)) p = p.parent
 
             p.toRealPath().toString() // resolve symlink?
         } catch (e: Exception) {
@@ -137,7 +137,6 @@ object  DesktopStartup {
             }
         } catch (e: Exception) {
             try {
-
                 Logger.tryLog {"fail to prepareUIFoundation: ${e.stackTraceToString()}"}
                 DefaultExceptionWindow("fail to prepareUIFoundation", e)
             } finally {

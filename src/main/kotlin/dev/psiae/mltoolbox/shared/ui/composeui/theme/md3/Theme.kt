@@ -10,8 +10,8 @@ import androidx.compose.ui.graphics.Color
 import dev.psiae.mltoolbox.shared.ui.md3.MD3Theme
 import dev.psiae.mltoolbox.shared.user.data.model.UserProfileSetting
 
-private var lightScheme by mutableStateOf(MD3ColorPalette_Green.lightColorScheme)
-private var darkScheme by mutableStateOf (MD3ColorPalette_Green.darkColorScheme)
+private var lightScheme by mutableStateOf(MD3ColorPalette_MLGreen.lightColorScheme)
+private var darkScheme by mutableStateOf (MD3ColorPalette_MLGreen.darkColorScheme)
 
 
 
@@ -48,11 +48,11 @@ fun MD3Theme.colorSchemeForSeedCode(
     isDarkTheme: Boolean
 ): ColorScheme {
     return when (seed) {
-        UserProfileSetting.Personalization.Theme.COLOR_SEED_GREEN -> if (isDarkTheme) MD3ColorPalette_Green.darkColorScheme else MD3ColorPalette_Green.lightColorScheme
-        UserProfileSetting.Personalization.Theme.COLOR_SEED_ORANGE -> if (isDarkTheme) MD3ColorPalette_Orange.darkColorScheme else MD3ColorPalette_Orange.lightColorScheme
-        UserProfileSetting.Personalization.Theme.COLOR_SEED_BLUE -> if (isDarkTheme) MD3ColorPalette_Blue.darkColorScheme else MD3ColorPalette_Blue.lightColorScheme
-        UserProfileSetting.Personalization.Theme.COLOR_SEED_YELLOW -> if (isDarkTheme) MD3ColorPalette_Yellow.darkColorScheme else MD3ColorPalette_Yellow.lightColorScheme
-        UserProfileSetting.Personalization.Theme.COLOR_SEED_PURPLE -> if (isDarkTheme) MD3ColorPalette_Purple.darkColorScheme else MD3ColorPalette_Purple.lightColorScheme
+        UserProfileSetting.Personalization.Theme.COLOR_SEED_GREEN -> if (isDarkTheme) MD3ColorPalette_AvocadoGreen.darkColorScheme else MD3ColorPalette_AvocadoGreen.lightColorScheme
+        UserProfileSetting.Personalization.Theme.COLOR_SEED_ORANGE -> if (isDarkTheme) MD3ColorPalette_RustOrange.darkColorScheme else MD3ColorPalette_RustOrange.lightColorScheme
+        UserProfileSetting.Personalization.Theme.COLOR_SEED_BLUE -> if (isDarkTheme) MD3ColorPalette_DarkCeruleanBlue.darkColorScheme else MD3ColorPalette_DarkCeruleanBlue.lightColorScheme
+        UserProfileSetting.Personalization.Theme.COLOR_SEED_YELLOW -> if (isDarkTheme) MD3ColorPalette_GargoyleGasYellow.darkColorScheme else MD3ColorPalette_GargoyleGasYellow.lightColorScheme
+        UserProfileSetting.Personalization.Theme.COLOR_SEED_PURPLE -> if (isDarkTheme) MD3ColorPalette_ChinesePurple.darkColorScheme else MD3ColorPalette_ChinesePurple.lightColorScheme
         else -> error("Unknown color seed: $seed")
     }
 }

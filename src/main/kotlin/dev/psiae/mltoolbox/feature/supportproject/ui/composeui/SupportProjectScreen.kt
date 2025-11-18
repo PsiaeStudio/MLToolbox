@@ -20,6 +20,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import dev.psiae.mltoolbox.shared.ui.composeui.HeightSpacer
+import dev.psiae.mltoolbox.shared.ui.composeui.core.locals.LocalComposeUIContext
 import dev.psiae.mltoolbox.shared.ui.composeui.gestures.defaultSurfaceGestureModifiers
 import dev.psiae.mltoolbox.shared.ui.composeui.theme.md3.LocalIsDarkTheme
 import dev.psiae.mltoolbox.shared.ui.composeui.theme.md3.Material3Theme
@@ -40,34 +41,43 @@ fun DonateMainScreen() {
         CompositionLocalProvider(
             LocalIndication provides MD3Theme.ripple(),
         ) {
-            Column(
+            ElevatedCard(
                 Modifier
                     .align(Alignment.Center)
-                    .border(
+                    /*.border(
                         width = 1.dp,
                         color = Material3Theme.colorScheme.outlineVariant,
                         shape = RoundedCornerShape(12.dp)
-                    )
-                    .background(Material3Theme.colorScheme.surfaceContainer, RoundedCornerShape(12.dp))
-                    .padding(32.dp),
+                    )*/
+                    /*.background(Material3Theme.colorScheme.surfaceContainerLow, RoundedCornerShape(12.dp))
+                    .padding(32.dp)*/,
+                shape = CardDefaults.elevatedShape,
+                colors = CardDefaults.elevatedCardColors(
+                    containerColor = Material3Theme.colorScheme.surfaceContainerLow,
+                ),
             ) {
-                Row(
-                    modifier = Modifier.align(Alignment.CenterHorizontally),
-                    horizontalArrangement = Arrangement.spacedBy(40.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                Column(
+                    Modifier
+                        .padding(all = 24.dp)
                 ) {
-                    PsiaeCardUI(modifier = Modifier)
-                    PatreonCardUI(modifier = Modifier)
-                }
+                    Row(
+                        modifier = Modifier.align(Alignment.CenterHorizontally),
+                        horizontalArrangement = Arrangement.spacedBy(40.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        PsiaeCardUI(modifier = Modifier)
+                        PatreonCardUI(modifier = Modifier)
+                    }
 
-                HeightSpacer(36.dp)
-                Text(
-                    text = buildAnnotatedString {
-                        append("Consider supporting us to keep the app working, up to date, and free to use for all user")
-                    },
-                    color = Material3Theme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
+                    HeightSpacer(36.dp)
+                    Text(
+                        text = buildAnnotatedString {
+                            append("Consider supporting us to keep the app working, up to date, and free to use for all user")
+                        },
+                        color = Material3Theme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                }
             }
         }
     }
@@ -78,25 +88,22 @@ private fun PsiaeCardUI(
     modifier: Modifier
 ) {
     val uriHandler = LocalUriHandler.current
-    val coroutineScope = rememberCoroutineScope()
     BoxWithConstraints(modifier) {
         ElevatedCard(
             modifier = Modifier
                 .then(
                     if (LocalIsDarkTheme.current)
-                        Modifier.shadow(elevation = 2.dp, RoundedCornerShape(12.dp))
+                        Modifier.shadow(elevation = 1.dp, RoundedCornerShape(12.dp))
                     else
                         Modifier
                 )
             /*.verticalScroll(rememberScrollState())*/,
-            colors = CardDefaults.cardColors(containerColor = Material3Theme.colorScheme.surfaceContainerHigh, contentColor = Material3Theme.colorScheme.onSurface),
+            colors = CardDefaults.cardColors(containerColor = Material3Theme.colorScheme.surfaceContainer, contentColor = Material3Theme.colorScheme.onSurface),
         ) {
             Column(
                 modifier = Modifier
                     .clickable {
-                        coroutineScope.launch(Dispatchers.IO) {
-                            uriHandler.openUri("https://www.psiae.fun/")
-                        }
+                        uriHandler.openUri("https://www.psiae.fun/")
                     }
                     .padding(36.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -143,19 +150,17 @@ private fun PatreonCardUI(
             modifier = Modifier
                 .then(
                     if (LocalIsDarkTheme.current)
-                        Modifier.shadow(elevation = 2.dp, RoundedCornerShape(12.dp))
+                        Modifier.shadow(elevation = 1.dp, RoundedCornerShape(12.dp))
                     else
                         Modifier
                 )
             /*.verticalScroll(rememberScrollState())*/,
-            colors = CardDefaults.cardColors(containerColor = Material3Theme.colorScheme.surfaceContainerHigh, contentColor = Material3Theme.colorScheme.onSurface),
+            colors = CardDefaults.cardColors(containerColor = Material3Theme.colorScheme.surfaceContainer, contentColor = Material3Theme.colorScheme.onSurface),
         ) {
             Column(
                 modifier = Modifier
                     .clickable {
-                        coroutineScope.launch(Dispatchers.IO) {
-                            uriHandler.openUri("https://www.patreon.com/c/psiae/membership")
-                        }
+                        uriHandler.openUri("https://www.patreon.com/c/psiae/membership")
                     }
                     .padding(36.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,

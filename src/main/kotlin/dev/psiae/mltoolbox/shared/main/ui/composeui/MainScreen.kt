@@ -91,15 +91,7 @@ fun MainScreen(
                     MainScreenLayoutSurface(
                         modifier = Modifier,
                         color = animateColorAsState(
-                            if (LocalIsDarkTheme.current) {
-                                Material3Theme.colorScheme.surfaceContainer
-                            } else {
-                                MD3Theme.surfaceColorAtElevation(
-                                    Material3Theme.colorScheme.surfaceContainerLow,
-                                    Material3Theme.colorScheme.surfaceTint,
-                                    1.dp
-                                )
-                            },
+                            Material3Theme.colorScheme.surfaceContainer,
                             animationSpec = tween(200)
                         ).value,
                     )
@@ -371,7 +363,9 @@ fun MainScreenLayoutBody(
             val dest = remember { mutableStateOf<StableList<MainDrawerDestination>>(StableList(listOf(modManagerDest)), neverEqualPolicy()) }
             Column(
                 modifier = Modifier
-                    .widthIn(max = 140.dp),
+                    .padding(horizontal = 4.dp)
+                    .widthIn(min = 120.dp, max = 160.dp)
+                    .padding(end = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Column(
@@ -435,7 +429,6 @@ fun MainScreenLayoutBody(
                     )
                 }
             }
-            Spacer(modifier = Modifier.width(MD3Spec.margin.spacingOfWindowWidthDp(maxWidth.value).dp))
             MainScreenLayoutScreenHost(dest.value)
         }
 

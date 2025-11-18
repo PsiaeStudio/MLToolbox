@@ -2,7 +2,6 @@ package dev.psiae.mltoolbox.shared.main.ui
 
 import dev.psiae.mltoolbox.shared.app.MLToolboxApp
 import dev.psiae.mltoolbox.shared.main.ui.composeui.querySystemOSBuildVersionStr
-import kotlinx.atomicfu.locks.ReentrantLock
 import kotlinx.atomicfu.locks.withLock
 import java.awt.Dimension
 import java.awt.Insets
@@ -10,6 +9,7 @@ import java.awt.Toolkit
 import java.awt.datatransfer.StringSelection
 import java.awt.event.ActionEvent
 import java.awt.event.KeyEvent
+import java.util.concurrent.locks.ReentrantLock
 import javax.swing.AbstractAction
 import javax.swing.JComponent
 import javax.swing.JFrame

@@ -51,21 +51,28 @@ import dev.psiae.mltoolbox.shared.ui.composeui.theme.md3.LocalIsDarkTheme
 import dev.psiae.mltoolbox.shared.ui.composeui.theme.md3.Material3Theme
 import dev.psiae.mltoolbox.shared.ui.composeui.theme.md3.currentLocalAbsoluteOnSurfaceColor
 import dev.psiae.mltoolbox.shared.java.jFile
+import dev.psiae.mltoolbox.shared.java.jPath
 import dev.psiae.mltoolbox.shared.platform.content.filepicker.JnaFileChooserWindowHost
 import dev.psiae.mltoolbox.shared.platform.content.filepicker.win32.JnaFileChooser
+import dev.psiae.mltoolbox.shared.ui.composeui.theme.md3.surfaceColorAtElevation
 import dev.psiae.mltoolbox.shared.ui.md3.MD3Spec
 import dev.psiae.mltoolbox.shared.ui.md3.MD3Theme
 import dev.psiae.mltoolbox.shared.ui.md3.incrementsDp
 import dev.psiae.mltoolbox.shared.ui.md3.padding
 import dev.psiae.mltoolbox.shared.utils.ensureSuffix
+import dev.psiae.mltoolbox.shared.utils.orNullString
 import dev.psiae.mltoolbox.shared.utils.runtimeError
 import io.github.vinceglb.filekit.core.FileKit
 import io.github.vinceglb.filekit.core.FileKitPlatformSettings
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
+import okio.Path.Companion.toPath
 import java.io.File
 import javax.swing.SwingUtilities
+import kotlin.io.path.Path
+import kotlin.io.path.invariantSeparatorsPathString
+import kotlin.io.path.pathString
 
 typealias jProcessHandle = ProcessHandle
 
@@ -100,15 +107,9 @@ fun SelectGameWorkingDirectoryScreen(
                     modifier = Modifier
                         .padding(horizontal = 48.dp)
                         .sizeIn(maxWidth = 1400.dp, maxHeight = 1400.dp)
-                        .align(Alignment.CenterHorizontally)
-                        .then(
-                            if (LocalIsDarkTheme.current)
-                                Modifier.shadow(elevation = 2.dp, RoundedCornerShape(12.dp))
-                            else
-                                Modifier
-                        ),
+                        .align(Alignment.CenterHorizontally),
                     colors = CardDefaults
-                        .cardColors(Material3Theme.colorScheme.surfaceContainerHigh, contentColor = Material3Theme.colorScheme.onSurface)
+                        .cardColors(Material3Theme.colorScheme.surfaceContainer, contentColor = Material3Theme.colorScheme.onSurface)
                 ) {
                     Column(
                         Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
@@ -572,11 +573,10 @@ private fun SelectGameInstallFolder(
                 }
             }
             HeightSpacer(12.dp)
-            ElevatedCard(
+            OutlinedCard(
                 modifier = Modifier,
                 colors = CardDefaults.cardColors(
-                    containerColor = if (LocalIsDarkTheme.current) Material3Theme.colorScheme.surfaceContainerHighest
-                    else Material3Theme.colorScheme.surfaceContainer,
+                    containerColor = Material3Theme.colorScheme.surfaceContainer,
                 ),
             ) {
                 Column(
@@ -687,7 +687,7 @@ private fun SelectGameDirs(
                 HeightSpacer(4.dp)
                 run {
                     val interactionSource = remember { MutableInteractionSource() }
-                    val path = state.pickedGameFolder?.absolutePath
+                    val path = state.pickedGameFolder?.absolutePath?.let(::jPath)?.invariantSeparatorsPathString?.ensureSuffix('/')
                     Row(
                         modifier = Modifier.hoverable(interactionSource),
                         verticalAlignment = Alignment.CenterVertically
@@ -701,7 +701,7 @@ private fun SelectGameDirs(
                                 overflow = TextOverflow.Ellipsis
                             )
                             Text(
-                                text = path?.ensureSuffix('\\').toString(),
+                                text = path.orEmpty(),
                                 color = Material3Theme.colorScheme.onSurface,
                                 style = Material3Theme.typography.labelLarge,
                                 maxLines = 1,
@@ -761,7 +761,13 @@ private fun SelectGameDirs(
                 Box(
                     modifier = Modifier
                         .align(Alignment.End)
-                        .background(Material3Theme.colorScheme.primary.copy(alpha = if (state.hasAllDirectoriesSelected) 1f else 0.1f), RoundedCornerShape(50))
+                        .background(
+                            if (state.hasAllDirectoriesSelected)
+                                Material3Theme.colorScheme.primary
+                            else
+                                Material3Theme.colorScheme.onSurface.copy(alpha = 0.1f),
+                            RoundedCornerShape(50)
+                        )
                         .clip(RoundedCornerShape(50))
                         .clickable(state.hasAllDirectoriesSelected) {
                             state.userSelectGameDirs()
@@ -771,7 +777,10 @@ private fun SelectGameDirs(
                 ) {
                     Text(
                         text = "Continue",
-                        color = Material3Theme.colorScheme.onPrimary.copy(alpha = if (state.hasAllDirectoriesSelected) 1f else 0.38f),
+                        color = if (state.hasAllDirectoriesSelected)
+                            Material3Theme.colorScheme.onPrimary
+                        else
+                            Material3Theme.colorScheme.onSurface.copy(alpha = 0.38f),
                         style = Material3Theme.typography.labelLarge.copy(fontSize = 16.sp),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -804,11 +813,10 @@ private fun GameDirectoriesBlock(
     state: SelectGameWorkingDirectoryState,
     editField: (String) -> Unit
 ) {
-    ElevatedCard(
+    OutlinedCard(
         modifier = Modifier,
         colors = CardDefaults.cardColors(
-            containerColor = if (LocalIsDarkTheme.current) Material3Theme.colorScheme.surfaceContainerHighest
-            else Material3Theme.colorScheme.surfaceContainer,
+            containerColor = Material3Theme.colorScheme.surfaceContainer
         ),
     ) {
         Column(
@@ -882,7 +890,7 @@ private fun GameRootFolderFieldEdit(
                 .padding(horizontal = 12.dp, vertical = 12.dp)
         ) {
             val textFieldState = remember {
-                TextFieldState(state.gameRootFolder?.absolutePath?.ensureSuffix("\\") ?: "")
+                TextFieldState(state.gameRootFolder?.absolutePath?.let(::jPath)?.invariantSeparatorsPathString?.ensureSuffix('/') ?: "")
             }
             val interactionSource = remember { MutableInteractionSource() }
             val validStartsWith by remember {
@@ -934,7 +942,7 @@ private fun GameRootFolderFieldEdit(
                         text = buildAnnotatedString {
                             append("Starts with ")
                             withStyle(Material3Theme.typography.labelMedium.toSpanStyle()) {
-                                append(state.pickedGameFolder?.absolutePath?.ensureSuffix("\\") ?: "")
+                                append(state.pickedGameFolder?.absolutePath?.let(::jPath)?.invariantSeparatorsPathString?.ensureSuffix('/') ?: "")
                             }
                         },
                         color = if (validStartsWith)
@@ -968,10 +976,10 @@ private fun GameRootFolderFieldEdit(
                     withStyle(Material3Theme.typography.labelMedium.toSpanStyle()) {
                         append(
                             when (state.selectedPlatform) {
-                                "steam" -> "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Manor Lords\\"
-                                "xbox_pc_gamepass" -> "C:\\XboxGames\\Manor Lords\\Content\\"
-                                "epic_games_store" -> "C:\\Program Files\\Epic Games\\Manor Lords\\"
-                                "gog_com" -> "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Manor Lords\\"
+                                "steam" -> "C:/Program Files (x86)/Steam/steamapps/common/Manor Lords/"
+                                "xbox_pc_gamepass" -> "C:/XboxGames/Manor Lords/Content/"
+                                "epic_games_store" -> "C:/Program Files/Epic Games/Manor Lords/"
+                                "gog_com" -> "C:/Program Files (x86)/GOG Galaxy/Games/Manor Lords/"
                                 else -> runtimeError("Unknown selected platform: ${state.selectedPlatform}")
                             }.replace(' ', '\u00A0')
                         )
@@ -983,7 +991,7 @@ private fun GameRootFolderFieldEdit(
                 overflow = TextOverflow.Ellipsis
             )
 
-            HeightSpacer(16.dp)
+            HeightSpacer(24.dp)
             Row(
                 modifier = Modifier.align(Alignment.End),
                 verticalAlignment = Alignment.CenterVertically
@@ -1040,7 +1048,7 @@ private fun GameLauncherExeFieldEdit(
                 .padding(horizontal = 12.dp, vertical = 12.dp)
         ) {
             val textFieldState = remember {
-                TextFieldState(state.gameLauncherExeFile?.absolutePath ?: "")
+                TextFieldState(state.gameLauncherExeFile?.absolutePath?.let(::jPath)?.invariantSeparatorsPathString ?: "")
             }
             val interactionSource = remember { MutableInteractionSource() }
             val validStartsWith by remember {
@@ -1101,7 +1109,7 @@ private fun GameLauncherExeFieldEdit(
                         text = buildAnnotatedString {
                             append("Starts with ")
                             withStyle(Material3Theme.typography.labelMedium.toSpanStyle()) {
-                                append(state.gameRootFolder?.absolutePath?.ensureSuffix("\\") ?: "")
+                                append(state.gameRootFolder?.absolutePath?.let(::jPath)?.invariantSeparatorsPathString?.ensureSuffix('/') ?: "")
                             }
                         },
                         color = if (validStartsWith)
@@ -1150,10 +1158,10 @@ private fun GameLauncherExeFieldEdit(
                     withStyle(Material3Theme.typography.labelMedium.toSpanStyle()) {
                         append(
                             when (state.selectedPlatform) {
-                                "steam" -> "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Manor Lords\\ManorLords.exe"
-                                "xbox_pc_gamepass" -> "C:\\XboxGames\\Manor Lords\\Content\\gamelaunchhelper.exe"
-                                "epic_games_store" -> "C:\\Program Files\\Epic Games\\Manor Lords\\ManorLords\\ManorLords.exe"
-                                "gog_com" -> "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Manor Lords\\ManorLords\\ManorLords.exe"
+                                "steam" -> "C:/Program Files (x86)/Steam/steamapps/common/Manor Lords/ManorLords.exe"
+                                "xbox_pc_gamepass" -> "C:/XboxGames/Manor Lords/Content/gamelaunchhelper.exe"
+                                "epic_games_store" -> "C:/Program Files/Epic Games/Manor Lords/ManorLords/ManorLords.exe"
+                                "gog_com" -> "C:/Program Files (x86)/GOG Galaxy/Games/Manor Lords/ManorLords/ManorLords.exe"
                                 else -> runtimeError("Unknown selected platform: ${state.selectedPlatform}")
                             }.replace(' ', '\u00A0')
                         )
@@ -1223,7 +1231,7 @@ private fun GameBinaryExeFieldEdit(
                 .padding(horizontal = 12.dp, vertical = 12.dp)
         ) {
             val textFieldState = remember {
-                TextFieldState(state.gameBinaryExeFile?.absolutePath ?: "")
+                TextFieldState(state.gameBinaryExeFile?.absolutePath?.let(::jPath)?.invariantSeparatorsPathString ?: "")
             }
             val interactionSource = remember { MutableInteractionSource() }
             val validStartsWith by remember {
@@ -1284,7 +1292,7 @@ private fun GameBinaryExeFieldEdit(
                         text = buildAnnotatedString {
                             append("Starts with ")
                             withStyle(Material3Theme.typography.labelMedium.toSpanStyle()) {
-                                append(state.gameRootFolder?.absolutePath?.ensureSuffix("\\") ?: "")
+                                append(state.gameRootFolder?.absolutePath?.let(::jPath)?.invariantSeparatorsPathString?.ensureSuffix('/') ?: "")
                             }
                         },
                         color = if (validStartsWith)
@@ -1333,10 +1341,10 @@ private fun GameBinaryExeFieldEdit(
                     withStyle(Material3Theme.typography.labelMedium.toSpanStyle()) {
                         append(
                             when (state.selectedPlatform) {
-                                "steam" -> "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Manor Lords\\ManorLords\\Binaries\\Win64\\ManorLords-Win64-Shipping.exe"
-                                "xbox_pc_gamepass" -> "C:\\XboxGames\\Manor Lords\\Content\\ManorLords\\Binaries\\WinGDK\\ManorLords-WinGDK-Shipping.exe"
-                                "epic_games_store" -> "C:\\Program Files\\Epic Games\\Manor Lords\\ManorLords\\Binaries\\Win64\\ManorLords-Win64-Shipping.exe"
-                                "gog_com" -> "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Manor Lords\\ManorLords\\Binaries\\Win64\\ManorLords-Win64-Shipping.exe"
+                                "steam" -> "C:/Program Files (x86)/Steam/steamapps/common/Manor Lords/ManorLords/Binaries/Win64/ManorLords-Win64-Shipping.exe"
+                                "xbox_pc_gamepass" -> "C:/XboxGames/Manor Lords/Content/ManorLords/Binaries/WinGDK/ManorLords-WinGDK-Shipping.exe"
+                                "epic_games_store" -> "C:/Program Files/Epic Games/Manor Lords/ManorLords/Binaries/Win64/ManorLords-Win64-Shipping.exe"
+                                "gog_com" -> "C:/Program Files (x86)/GOG Galaxy/Games/Manor Lords/ManorLords/Binaries/Win64/ManorLords-Win64-Shipping.exe"
                                 else -> runtimeError("Unknown selected platform: ${state.selectedPlatform}")
                             }.replace(' ', '\u00A0')
                         )
@@ -1405,7 +1413,7 @@ private fun GamePaksFolderFieldEdit(
                 .padding(horizontal = 12.dp, vertical = 12.dp)
         ) {
             val textFieldState = remember {
-                TextFieldState(state.gamePaksFolder?.absolutePath?.ensureSuffix("\\") ?: "")
+                TextFieldState(state.gamePaksFolder?.absolutePath?.let(::jPath)?.invariantSeparatorsPathString?.ensureSuffix('/') ?: "")
             }
             val interactionSource = remember { MutableInteractionSource() }
             val validStartsWith by remember {
@@ -1457,7 +1465,7 @@ private fun GamePaksFolderFieldEdit(
                         text = buildAnnotatedString {
                             append("Starts with ")
                             withStyle(Material3Theme.typography.labelMedium.toSpanStyle()) {
-                                append(state.gameRootFolder?.absolutePath?.ensureSuffix("\\") ?: "")
+                                append(state.gameRootFolder?.absolutePath?.let(::jPath)?.invariantSeparatorsPathString?.ensureSuffix('/') ?: "")
                             }
                         },
                         color = if (validStartsWith)
@@ -1491,10 +1499,10 @@ private fun GamePaksFolderFieldEdit(
                     withStyle(Material3Theme.typography.labelMedium.toSpanStyle()) {
                         append(
                             when (state.selectedPlatform) {
-                                "steam" -> "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Manor Lords\\ManorLords\\Content\\Paks"
-                                "xbox_pc_gamepass" -> "C:\\XboxGames\\Manor Lords\\Content\\ManorLords\\Content\\Paks"
-                                "epic_games_store" -> "C:\\Program Files\\Epic Games\\Manor Lords\\ManorLords\\Content\\Paks"
-                                "gog_com" -> "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Manor Lords\\ManorLords\\Content\\Paks"
+                                "steam" -> "C:/Program Files (x86)/Steam/steamapps/common/Manor Lords/ManorLords/Content/Paks"
+                                "xbox_pc_gamepass" -> "C:/XboxGames/Manor Lords/Content/ManorLords/Content/Paks"
+                                "epic_games_store" -> "C:/Program Files/Epic Games/Manor Lords/ManorLords/Content/Paks"
+                                "gog_com" -> "C:/Program Files (x86)/GOG Galaxy/Games/Manor Lords/ManorLords/Content/Paks"
                                 else -> runtimeError("Unknown selected platform: ${state.selectedPlatform}")
                             }.replace(' ', '\u00A0')
                         )
@@ -1552,7 +1560,7 @@ private fun GameRootFolderField(
     edit: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val path = state.gameRootFolder?.absolutePath
+    val path = state.gameRootFolder?.absolutePath?.let(::jPath)?.invariantSeparatorsPathString?.ensureSuffix('/')
     Row(
         modifier = Modifier.hoverable(interactionSource),
         verticalAlignment = Alignment.CenterVertically
@@ -1566,7 +1574,7 @@ private fun GameRootFolderField(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = path?.plus('\\') ?: "",
+                text = path.orEmpty(),
                 color = Material3Theme.colorScheme.onSurface,
                 style = Material3Theme.typography.labelMedium,
                 maxLines = 1,
@@ -1612,7 +1620,7 @@ private fun GameLauncherExeField(
     edit: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val path = state.gameLauncherExeFile?.absolutePath
+    val path = state.gameLauncherExeFile?.absolutePath?.let(::jPath)?.invariantSeparatorsPathString
     Row(
         modifier = Modifier.hoverable(interactionSource),
         verticalAlignment = Alignment.CenterVertically
@@ -1671,7 +1679,7 @@ private fun GameBinaryExeField(
     edit: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val path = state.gameBinaryExeFile?.absolutePath
+    val path = state.gameBinaryExeFile?.absolutePath?.let(::jPath)?.invariantSeparatorsPathString
     Row(
         modifier = Modifier.hoverable(interactionSource),
         verticalAlignment = Alignment.CenterVertically
@@ -1732,7 +1740,7 @@ private fun GamePaksFolderField(
     edit: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }
-    val path = state.gamePaksFolder?.absolutePath
+    val path = state.gamePaksFolder?.absolutePath?.let(::jPath)?.invariantSeparatorsPathString?.ensureSuffix('/')
     Row(
         modifier = Modifier.hoverable(interactionSource),
         verticalAlignment = Alignment.CenterVertically
@@ -1746,7 +1754,7 @@ private fun GamePaksFolderField(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = path?.plus('\\') ?: "",
+                text = path.orEmpty(),
                 color = Material3Theme.colorScheme.onSurface,
                 style = Material3Theme.typography.labelMedium,
                 maxLines = 1,
@@ -1797,46 +1805,39 @@ private fun PickFolderWidget(
             .align(Alignment.CenterHorizontally)
             .defaultMinSize(minWidth = 500.dp, minHeight = 42.dp)
             .sizeIn(maxWidth = 800.dp)
-            .clip(RoundedCornerShape(4.dp))
+            .clip(RoundedCornerShape(8.dp))
             .then(
                 if (LocalIsDarkTheme.current)
-                    Modifier.shadow(elevation = 2.dp, RoundedCornerShape(4.dp))
+                    Modifier.shadow(elevation = 2.dp, RoundedCornerShape(8.dp))
                 else
-                    Modifier.border(width = 1.dp, Material3Theme.colorScheme.outlineVariant, RoundedCornerShape(4.dp))
+                    Modifier.border(1.dp, Material3Theme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
             )
             .clickable { state.userInputOpenGameDirPicker() }
-            .background(Material3Theme.colorScheme.inverseOnSurface)
+            .background(
+                if (LocalIsDarkTheme.current)
+                    Material3Theme.colorScheme.surfaceContainerHigh
+                else
+                    Material3Theme.colorScheme.surfaceBright
+            )
         ) {
             Row(
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .padding(horizontal = 8.dp)
+                    .padding(horizontal = 12.dp)
                     .defaultMinSize(minWidth = 500.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 run {
-                    val f = state.pickedGameFolder
-                    val fp = state.pickedGameFolder?.absolutePath
-                    val (fp1, fp2) = remember(f) {
-                        run {
-                            var dash = false
-                            fp?.dropLastWhile { c -> !dash.also { dash = c == '\\' } }
-                        } to run {
-                            var dash = false
-                            fp?.takeLastWhile { c -> !dash.also { dash = c == '\\' } }
-                        }
-                    }
                     val color = Material3Theme.colorScheme.onSurface.copy(alpha = 0.78f)
                     Text(
                         modifier = Modifier
                             .weight(1f, fill = true)
                             .align(Alignment.CenterVertically),
-                        text = fp1?.plus(fp2) ?: "Pick game folder",
-                        style = Material3Theme.typography.labelMedium,
+                        text = state.pickedGameFolder?.absolutePath?.let(::jPath)?.invariantSeparatorsPathString?.ensureSuffix('/') ?: "Pick game folder",
+                        style = Material3Theme.typography.bodyMedium,
                         color = color,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        fontWeight = FontWeight.SemiBold,
+                        overflow = TextOverflow.Ellipsis
                     )
                 }
                 WidthSpacer(MD3Spec.padding.incrementsDp(2).dp)
@@ -1860,19 +1861,19 @@ private fun PickFolderWidget(
             )
         }
         if (showExample) {
-            HeightSpacer(12.dp)
+            HeightSpacer(16.dp)
             Row {
-                WidthSpacer(12.dp)
+                WidthSpacer(4.dp)
                 Text(
                     text = buildAnnotatedString {
                         append("example: ")
                         withStyle(Material3Theme.typography.labelMedium.toSpanStyle()) {
                             append(
                                 when (state.selectedPlatform) {
-                                    "steam" -> "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Manor Lords\\"
-                                    "xbox_pc_gamepass" -> "C:\\XboxGames\\Manor Lords\\"
-                                    "epic_games_store" -> "C:\\Program Files\\Epic Games\\Manor Lords\\"
-                                    "gog_com" -> "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Manor Lords\\"
+                                    "steam" -> "C:/Program Files (x86)/Steam/steamapps/common/Manor Lords/"
+                                    "xbox_pc_gamepass" -> "C:/XboxGames/Manor Lords/"
+                                    "epic_games_store" -> "C:/Program Files/Epic Games/Manor Lords/"
+                                    "gog_com" -> "C:/Program Files (x86)/GOG Galaxy/Games/Manor Lords/"
                                     else -> throw RuntimeException("unknown selected platform: ${state.selectedPlatform}")
                                 }
                             )
@@ -1955,7 +1956,7 @@ private fun SelectGameVersion(
             HeightSpacer(4.dp)
             run {
                 val interactionSource = remember { MutableInteractionSource() }
-                val path = state.pickedGameFolder?.absolutePath
+                val path = state.pickedGameFolder?.absolutePath?.let(::jPath)?.invariantSeparatorsPathString?.ensureSuffix('/')
                 Row(
                     modifier = Modifier.hoverable(interactionSource),
                     verticalAlignment = Alignment.CenterVertically
@@ -1969,7 +1970,7 @@ private fun SelectGameVersion(
                             overflow = TextOverflow.Ellipsis
                         )
                         Text(
-                            text = path?.ensureSuffix('\\').toString(),
+                            text = path.orEmpty(),
                             color = Material3Theme.colorScheme.onSurface,
                             style = Material3Theme.typography.labelLarge,
                             maxLines = 1,
@@ -2011,7 +2012,7 @@ private fun SelectGameVersion(
             HeightSpacer(4.dp)
             run {
                 val interactionSource = remember { MutableInteractionSource() }
-                val path = state.pickedGameFolder?.absolutePath
+                val path = state.pickedGameFolder?.absolutePath?.let(::jPath)?.invariantSeparatorsPathString?.ensureSuffix('/')
                 Row(
                     modifier = Modifier.hoverable(interactionSource),
                     verticalAlignment = Alignment.CenterVertically
@@ -2198,7 +2199,13 @@ private fun SelectGameVersion(
             Box(
                 modifier = Modifier
                     .align(Alignment.End)
-                    .background(Material3Theme.colorScheme.primary.copy(alpha = if (state.hasGameVersionSelected) 1f else 0.1f), RoundedCornerShape(50))
+                    .background(
+                        if (state.hasGameVersionSelected)
+                            Material3Theme.colorScheme.primary
+                        else
+                            Material3Theme.colorScheme.onSurface.copy(alpha = 0.1f),
+                        RoundedCornerShape(50)
+                    )
                     .clip(RoundedCornerShape(50))
                     .clickable(state.hasGameVersionSelected) {
                         state.userSelectGameVersion()
@@ -2208,7 +2215,10 @@ private fun SelectGameVersion(
             ) {
                 Text(
                     text = "Continue",
-                    color = Material3Theme.colorScheme.onPrimary.copy(alpha = if (state.hasGameVersionSelected) 1f else 0.38f),
+                    color = if (state.hasGameVersionSelected)
+                        Material3Theme.colorScheme.onPrimary
+                    else
+                        Material3Theme.colorScheme.onSurface.copy(alpha = 0.38f),
                     style = Material3Theme.typography.labelLarge.copy(fontSize = 16.sp),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis

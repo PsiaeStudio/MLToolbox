@@ -1,9 +1,4 @@
-## Currently Under Rework
-Is currently reworked in private repo, will push here once they are usable
-
-<br><br/>
 ### Under Active Development
-
 ## Disclaimer
 This project is in no way affiliated with or endorsed by "Manor Lords" developer "Slavic Magic" or it's publisher "Hooded Horse"
 
@@ -16,8 +11,8 @@ For formal inquiries, contact me at any of the following emails: psiae.li@gmail.
 [https://www.nexusmods.com/manorlords/mods/256](https://www.nexusmods.com/manorlords/mods/256)
 
 ## Supported Mod Loaders
-1. [Unreal Engine Pak Patcher](https://dev.epicgames.com/documentation/en-us/unreal-engine/patching-content-delivery-and-dlc-in-unreal-engine)
-2. [RE-UE4SS](https://github.com/UE4SS-RE/RE-UE4SS)
+  1. [Unreal Engine Pak Patcher](https://dev.epicgames.com/documentation/en-us/unreal-engine/patching-content-delivery-and-dlc-in-unreal-engine)
+  2. [RE-UE4SS](https://github.com/UE4SS-RE/RE-UE4SS)
 
 ## FAQ
 

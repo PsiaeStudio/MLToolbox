@@ -1,17 +1,19 @@
 package dev.psiae.mltoolbox.shared.user.domain
 
-import dev.psiae.mltoolbox.shared.user.data.UserProfileDataStore
 import dev.psiae.mltoolbox.shared.user.data.UserRepository
 import dev.psiae.mltoolbox.shared.user.data.model.UserProfile
 import dev.psiae.mltoolbox.shared.user.data.model.UserProfileSetting
 import dev.psiae.mltoolbox.shared.utils.LazyConstructor
 import dev.psiae.mltoolbox.shared.utils.valueOrNull
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -72,14 +74,31 @@ class UserService(
     }
 
     fun changeUserProfileColorMode(uid: String, colorMode: String): Deferred<Unit> {
-        return _coroutineScope.async(Dispatchers.IO) {
+        val def = CompletableDeferred<Unit>()
+        _coroutineScope.launch(Dispatchers.IO) {
             userRepo.userProfileDataStore.changeUserProfileColorMode(uid, colorMode)
+        }.invokeOnCompletion { cancellationCause ->
+            when (cancellationCause) {
+                null -> def.complete(Unit)
+                is CancellationException -> def.cancel(cancellationCause)
+                else -> def.completeExceptionally(cancellationCause)
+            }
         }
+        return def
     }
+
     fun changeUserProfileColorSeed(uid: String, colorSeed: String): Deferred<Unit> {
-        return _coroutineScope.async(Dispatchers.IO) {
+        val def = CompletableDeferred<Unit>()
+        _coroutineScope.launch(Dispatchers.IO) {
             userRepo.userProfileDataStore.changeUserProfileColorSeed(uid, colorSeed)
+        }.invokeOnCompletion { cancellationCause ->
+            when (cancellationCause) {
+                null -> def.complete(Unit)
+                is CancellationException -> def.cancel(cancellationCause)
+                else -> def.completeExceptionally(cancellationCause)
+            }
         }
+        return def
     }
 
 

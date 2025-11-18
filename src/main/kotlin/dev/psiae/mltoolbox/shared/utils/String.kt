@@ -79,3 +79,4 @@ private inline fun String.transformFirstCharIfNeeded(
     return this
 }
 
+fun String?.orNullString() = toString()

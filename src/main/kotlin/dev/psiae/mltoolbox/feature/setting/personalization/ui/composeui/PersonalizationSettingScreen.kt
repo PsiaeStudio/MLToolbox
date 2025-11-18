@@ -24,7 +24,6 @@ import dev.psiae.mltoolbox.feature.setting.ui.SettingScreenState
 import dev.psiae.mltoolbox.shared.ui.composeui.HeightSpacer
 import dev.psiae.mltoolbox.shared.ui.composeui.WidthSpacer
 import dev.psiae.mltoolbox.shared.ui.composeui.gestures.defaultSurfaceGestureModifiers
-import dev.psiae.mltoolbox.shared.ui.composeui.theme.md3.LocalIsDarkTheme
 import dev.psiae.mltoolbox.shared.ui.composeui.theme.md3.Material3Theme
 import dev.psiae.mltoolbox.shared.ui.composeui.theme.md3.ripple
 import dev.psiae.mltoolbox.shared.ui.md3.MD3Theme
@@ -40,7 +39,7 @@ fun PersonalizationSettingScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(animateColorAsState(
-                if (LocalIsDarkTheme.current) Material3Theme.colorScheme.surface else MaterialTheme.colorScheme.surfaceContainerLow,
+                MaterialTheme.colorScheme.surface,
                 animationSpec = tween(200)
             ).value)
             .defaultSurfaceGestureModifiers()
@@ -190,7 +189,11 @@ fun PersonalizationSettingScreenContent(
                             contentDescription = null,
                         )
                     }
-                    DropdownMenu(expanded, { expanded = false }, Modifier.width(160.dp)) {
+                    DropdownMenu(
+                        expanded,
+                        { expanded = false },
+                        Modifier.width(160.dp),
+                    ) {
                         Column(modifier = Modifier.padding(vertical = 4.dp)) {
                             Row(
                                 Modifier.height(48.dp)
@@ -280,10 +283,11 @@ fun PersonalizationSettingScreenContent(
                     Row(
                         modifier = Modifier
                             .height(40.dp)
-                            .width(160.dp)
+                            .width(220.dp)
                             .background(MaterialTheme.colorScheme.surfaceContainer)
                             .clickable { expanded = !expanded }
-                            .padding(horizontal = 12.dp)
+                            .padding(horizontal = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(
                             modifier = Modifier.clip(CircleShape).align(Alignment.CenterVertically).size(24.dp).background(
@@ -301,11 +305,11 @@ fun PersonalizationSettingScreenContent(
                         Text(
                             modifier = Modifier.align(Alignment.CenterVertically),
                             text = when (selectedColorSeed) {
-                                UserProfileSetting.Personalization.Theme.COLOR_SEED_GREEN -> "Green"
-                                UserProfileSetting.Personalization.Theme.COLOR_SEED_ORANGE -> "Orange"
-                                UserProfileSetting.Personalization.Theme.COLOR_SEED_BLUE -> "Blue"
-                                UserProfileSetting.Personalization.Theme.COLOR_SEED_YELLOW -> "Yellow"
-                                UserProfileSetting.Personalization.Theme.COLOR_SEED_PURPLE -> "Purple"
+                                UserProfileSetting.Personalization.Theme.COLOR_SEED_GREEN -> "Avocado Green"
+                                UserProfileSetting.Personalization.Theme.COLOR_SEED_ORANGE -> "Rust Orange"
+                                UserProfileSetting.Personalization.Theme.COLOR_SEED_BLUE -> "Dark Cerulean Blue"
+                                UserProfileSetting.Personalization.Theme.COLOR_SEED_YELLOW -> "Gargoyle Gas Yellow"
+                                UserProfileSetting.Personalization.Theme.COLOR_SEED_PURPLE -> "Chinese Purple"
                                 else -> "Unknown"
                             },
                             color = Material3Theme.colorScheme.onSurface,

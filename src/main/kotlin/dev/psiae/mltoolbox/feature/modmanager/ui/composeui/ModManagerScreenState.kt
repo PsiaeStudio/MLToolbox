@@ -48,6 +48,7 @@ class ModManagerScreenState(
         private set
     var gameLauncherFile by mutableStateOf<jFile?>(null)
         private set
+
     var gameBinaryFile by mutableStateOf<jFile?>(null)
         private set
     var gamePaksFolder by mutableStateOf<jFile?>(null)

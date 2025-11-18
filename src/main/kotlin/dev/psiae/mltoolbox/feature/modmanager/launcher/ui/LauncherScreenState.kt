@@ -5,6 +5,7 @@ import dev.psiae.mltoolbox.shared.ui.composeui.core.ComposeUIContext
 import dev.psiae.mltoolbox.shared.ui.composeui.core.locals.LocalComposeUIContext
 import dev.psiae.mltoolbox.feature.modmanager.ui.composeui.ModManagerScreenState
 import dev.psiae.mltoolbox.shared.java.jFile
+import dev.psiae.mltoolbox.shared.logger.Logger
 import dev.psiae.mltoolbox.shared.modmanager.ModManager
 import dev.psiae.mltoolbox.shared.utils.deleteRecursivelyBool
 import dev.psiae.mltoolbox.shared.utils.removePrefix
@@ -105,7 +106,7 @@ class LauncherScreenState(
                 }
                 withContext(Dispatchers.IO) {
                     val processBuilder = ProcessBuilder("cmd.exe", "/c", "start", "", exe.absolutePath)
-                    processBuilder.start()
+                    val process = processBuilder.start()
                 }
             }.onFailure { t ->
                 if (t is IOException) {
@@ -224,7 +225,7 @@ class LauncherScreenState(
                 }
 
                 val gameRoot = gameRootFolder.absolutePath
-                val pakModsDir = jFile("$gameRoot\\Content\\Paks\\~mods")
+                val pakModsDir = jFile("$gamePaksFolder\\~mods")
                 if (pakModsDir.isDirectory) {
                     if (!pakModsDir.toPath().deleteRecursivelyBool()) {
                         launchingErr = true
@@ -233,7 +234,7 @@ class LauncherScreenState(
                     }
                 }
 
-                val logicModsDir = jFile("$gameRoot\\Content\\Paks\\LogicMods")
+                val logicModsDir = jFile("$gamePaksFolder\\LogicMods")
                 if (logicModsDir.isDirectory) {
                     if (!logicModsDir.toPath().deleteRecursivelyBool()) {
                         launchingErr = true

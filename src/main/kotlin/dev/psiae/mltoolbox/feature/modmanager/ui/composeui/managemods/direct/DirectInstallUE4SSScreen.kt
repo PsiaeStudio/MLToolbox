@@ -67,7 +67,6 @@ fun DirectInstallUE4SSScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .height(64.dp)
                         .fillMaxWidth()
                         .background(
                             color = MD3Theme.surfaceColorAtElevation(
@@ -77,41 +76,48 @@ fun DirectInstallUE4SSScreen(
                             )
                         )
                 ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = Modifier
+                            .padding(bottom = 12.dp)
                     ) {
-                        SimpleTooltip(
-                            "go back"
+                        Row(
+                            modifier = Modifier,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .clickable(onClick = { directInstallModScreenState.userInputNavigateOutInstallUE4SS() })
-                                    .padding(vertical = 4.dp, horizontal = 4.dp)
+                            SimpleTooltip(
+                                "go back"
                             ) {
-                                Icon(
-                                    modifier = Modifier.size(20.dp),
-                                    painter = painterResource("drawable/arrow_left_simple_32px.png"),
-                                    tint = Material3Theme.colorScheme.onSurface,
-                                    contentDescription = null
-                                )
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                ) {
+                                    Box (
+                                        modifier = Modifier
+                                            .align(Alignment.Center)
+                                            .clickable(onClick = { directInstallModScreenState.userInputNavigateOutInstallUE4SS() })
+                                            .padding(2.dp)
+                                    ) {
+                                        Icon(
+                                            modifier = Modifier.size(24.dp),
+                                            painter = painterResource("drawable/arrow_left_simple_32px.png"),
+                                            tint = Material3Theme.colorScheme.onSurface,
+                                            contentDescription = null
+                                        )
+                                    }
+                                }
                             }
                         }
-
-                        WidthSpacer(16.dp)
-
-                        Row {
+                        Row(
+                            modifier = Modifier.padding(start = 16.dp)
+                        ) {
                             Text(
-                                "Install RE-UE4SS mod loader",
-                                style = Material3Theme.typography.headlineSmall.copy(
-                                    baselineShift = BaselineShift(-0.1f)
-                                ),
+                                "Install RE-UE4SS Mod Loader",
+                                style = Material3Theme.typography.headlineMedium,
                                 color = Material3Theme.colorScheme.onSurface,
                             )
                         }
                     }
                 }
-
                 Row {
                     Column(
                         modifier = Modifier
@@ -119,9 +125,9 @@ fun DirectInstallUE4SSScreen(
                             .padding(horizontal = 16.dp)
                             .verticalScroll(scrollState)
                     ) {
-                        HeightSpacer(12.dp)
+                        HeightSpacer(16.dp)
                         Text(
-                            text = "RE-UE4SS Installation",
+                            text = "Installation",
                             style = Material3Theme.typography.titleLarge,
                             color = Material3Theme.colorScheme.onSurface,
                             maxLines = 1
@@ -131,15 +137,7 @@ fun DirectInstallUE4SSScreen(
                             modifier = Modifier.padding(horizontal = 8.dp)
                         ) {
                             val str = buildAnnotatedString {
-                                append("1. Download RE-UE4SS: ")
-                                pushStringAnnotation(tag = "ue4ss", annotation = "https://www.nexusmods.com/manorlords/mods/229?tab=files")
-                                withStyle(SpanStyle(Material3Theme.colorScheme.primary, textDecoration = TextDecoration.Underline)) {
-                                    append("https://www.nexusmods.com/manorlords/mods/229?tab=files")
-                                }
-                                pop()
-
-                                append("\n")
-                                append("2. Import the downloaded (.zip) file below")
+                                append("1. Import the downloaded (.zip) file below")
 
                                 append("\n\n")
                                 withStyle(Material3Theme.typography.bodySmall.toSpanStyle()) {
@@ -421,7 +419,7 @@ private fun SelectUE4SSArchiveUICard(
                         } else if (ue4ssState.isInstalledSuccessfully) {
                             HeightSpacer(24.dp)
                             val text = buildAnnotatedString {
-                                append("Installed Successfully !")
+                                append("UE4SS Installed Successfully !")
                             }
                             Text(
                                 modifier = Modifier.weight(1f, false),

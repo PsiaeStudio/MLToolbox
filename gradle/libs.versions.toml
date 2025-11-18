@@ -1,0 +1,52 @@
+[versions]
+kotlin = "2.3.0-Beta1"
+kotlinx-serialization = "1.9.0"
+jetbrains-compose = "1.9.0-alpha02"
+jna = "5.18.1"
+sevenzipjbinding = "16.02-2.01"
+
+sqldelight = "2.1.0"
+protobuf = "0.9.5"
+protoc = "4.33.0"
+
+[libraries]
+kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version = "0.7.1" }
+kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+
+jetbrains-compose-foundation = { group = "org.jetbrains.compose.foundation", name = "foundation", version.ref = "jetbrains-compose" }
+jetbrains-compose-desktop-jvm-windows-x64 = { group = "org.jetbrains.compose.desktop", name = "desktop-jvm-windows-x64", version.ref = "jetbrains-compose" }
+jetbrains-compose-material = { group = "org.jetbrains.compose.material", name = "material", version.ref = "jetbrains-compose" }
+jetbrains-compose-material3 = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "jetbrains-compose" }
+
+coil3-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version = "3.3.0" }
+
+jna = { group = "net.java.dev.jna", name = "jna", version.ref = "jna" }
+jna-platform = { group = "net.java.dev.jna", name = "jna-platform", version.ref = "jna" }
+
+filekit-core = { group = "io.github.vinceglb", name = "filekit-core", version = "0.8.7" }
+
+zip4j = { group = "net.lingala.zip4j", name = "zip4j", version = "2.11.5" }
+junrar = { group = "com.github.junrar", name = "junrar", version = "7.5.5" }
+
+sevenzipjbinding = { group = "net.sf.sevenzipjbinding", name = "sevenzipjbinding", version.ref = "sevenzipjbinding" }
+sevenzipjbinding-windows-amd64 = { group = "net.sf.sevenzipjbinding", name = "sevenzipjbinding-windows-amd64", version.ref = "sevenzipjbinding" }
+
+log4k = { group = "de.peilicke.sascha", name = "log4k", version = "1.5.2" }
+
+sqldelight-driver = { group = "app.cash.sqldelight", name = "sqlite-driver", version = "2.1.0" }
+androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core", version = "1.1.7" }
+protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protoc" }
+protobuf-kotlin = { group = "com.google.protobuf", name = "protobuf-kotlin", version.ref = "protoc" }
+
+[plugins]
+jetbrains-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+jetbrains-kotlin-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
+kotlinx-atomicfu = { id = "org.jetbrains.kotlinx.atomicfu", version = "0.30.0-beta" }
+kotlinx-atomicfu-gradle-plugin = { id = "org.jetbrains.kotlinx:atomicfu-gradle-plugin", version = "0.24.0" }
+
+jetbrains-compose-plugin = { id = "org.jetbrains.compose", version = "1.10.0-beta01" }
+
+sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight"}
+protobuf = { id = "com.google.protobuf", version.ref = "protobuf" }

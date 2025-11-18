@@ -3,15 +3,16 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.compose.desktop.application.tasks.AbstractJPackageTask
 
 plugins {
-    kotlin("jvm")
-    id("org.jetbrains.compose")
-    id("org.jetbrains.kotlin.plugin.compose")
-    id("app.cash.sqldelight") version "2.1.0"
-    id("com.google.protobuf") version "0.9.5"
+    alias(libs.plugins.jetbrains.kotlin.jvm)
+    alias(libs.plugins.jetbrains.kotlin.compose.compiler)
+    alias(libs.plugins.jetbrains.compose.plugin)
+    alias(libs.plugins.kotlinx.atomicfu)
+    alias(libs.plugins.sqldelight)
+    alias(libs.plugins.protobuf)
 }
 
 group = "dev.psiae"
-version = "1.0.1-alpha.4"
+version = "1.0.1-alpha.5"
 
 repositories {
     mavenCentral()
@@ -38,7 +39,7 @@ java {
 sqldelight {
     databases {
        create(
-           name ="Database",
+           name = "Database",
            configureAction = Action<SqlDelightDatabase>{
                packageName.set("dev.psiae.mltoolbox.data")
            }
@@ -48,7 +49,7 @@ sqldelight {
 
 protobuf {
     protoc {
-        artifact = "com.google.protobuf:protoc:4.33.0"
+        artifact = libs.protobuf.protoc.get().toString()
     }
 }
 
@@ -57,47 +58,32 @@ dependencies {
     // compose.desktop.currentOs should be used in launcher-sourceSet
     // (in a separate module for demo project and in testMain).
     // With compose.desktop.common you will also lose @Preview functionality
-    implementation(compose.material)
-    implementation(compose.material3)
-    implementation(compose.desktop.currentOs)
 
-    implementation("net.java.dev.jna:jna:5.18.0")
-    implementation("net.java.dev.jna:jna-platform:5.18.0")
+    implementation(libs.jetbrains.compose.foundation)
+    implementation(libs.jetbrains.compose.material)
+    implementation(libs.jetbrains.compose.material3)
+    implementation(libs.jetbrains.compose.desktop.jvm.windows.x64)
 
-    implementation("io.github.vinceglb:filekit-core:0.8.7")
-    implementation("io.coil-kt.coil3:coil-compose:3.3.0")
+    implementation(libs.jna)
+    implementation(libs.jna.platform)
 
-    // zip
-    implementation("net.lingala.zip4j:zip4j:2.11.5")
+    implementation(libs.kotlinx.serialization.core)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.kotlinx.datetime)
 
-    // rar
-    implementation("com.github.junrar:junrar:7.5.5")
+    implementation(libs.filekit.core)
+    implementation(libs.coil3.compose)
 
-    // zip, rar5, 7z
-    implementation("net.sf.sevenzipjbinding:sevenzipjbinding:16.02-2.01")
-    implementation("net.sf.sevenzipjbinding:sevenzipjbinding-windows-amd64:16.02-2.01")
+    implementation(libs.zip4j)
+    implementation(libs.junrar)
+    implementation(libs.sevenzipjbinding)
+    implementation(libs.sevenzipjbinding.windows.amd64)
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.9.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
+    implementation(libs.log4k)
 
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
-
-    // log
-    implementation("de.peilicke.sascha:log4k:1.5.2")
-
-
-    /// should we use version catalogs ?
-
-    // repo
-    implementation("org.mobilenativefoundation.store:store5:5.1.0-alpha07")
-
-    // sqlite
-    implementation("app.cash.sqldelight:sqlite-driver:2.1.0")
-
-    // datastore
-    implementation("androidx.datastore:datastore-core:1.1.7")
-
-    implementation("com.google.protobuf:protobuf-kotlin:4.33.0")
+    implementation(libs.sqldelight.driver)
+    implementation(libs.androidx.datastore.core)
+    implementation(libs.protobuf.kotlin)
 }
 
 compose.desktop {

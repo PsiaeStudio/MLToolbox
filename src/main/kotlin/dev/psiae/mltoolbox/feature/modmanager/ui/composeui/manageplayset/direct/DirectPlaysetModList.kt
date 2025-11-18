@@ -41,16 +41,17 @@ import dev.psiae.mltoolbox.shared.java.jFile
 import dev.psiae.mltoolbox.shared.ui.md3.MD3Theme
 import kotlinx.coroutines.*
 import kotlin.collections.lastIndex
-import kotlin.coroutines.coroutineContext
 
 @Composable
 fun DirectModList(
     screenState: ManageDirectPlaysetScreenState
 ) {
     val state = rememberDirectModListState(screenState)
-    Column(modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth()) {
-        Row(modifier = Modifier.align(Alignment.CenterHorizontally).padding(horizontal = 4.dp, vertical = 8.dp)) { DirectModsQuerySearchBarPanel(state) }
-        Box(modifier = Modifier.padding(vertical = 4.dp)) { DirectModListLazyColumn(state) }
+    Column(modifier = Modifier.padding(horizontal = 20.dp).fillMaxWidth()) {
+        HeightSpacer(8.dp)
+        Row(modifier = Modifier.align(Alignment.CenterHorizontally).padding(horizontal = 4.dp, vertical = 4.dp)) { DirectModsQuerySearchBarPanel(state) }
+        HeightSpacer(4.dp)
+        DirectModListLazyColumn(state)
     }
 }
 
@@ -62,7 +63,8 @@ private fun DirectModListLazyColumn(modListState: DirectModListState) {
             modifier = Modifier
                 .weight(1f, false)
                 .fillMaxSize(),
-            state = scrollState
+            state = scrollState,
+            contentPadding = PaddingValues(vertical = 12.dp)
         ) {
             val list = if (modListState.queryParamsEnabled)
                 modListState.queriedInstalledModList
@@ -521,7 +523,7 @@ private class DirectModListState(
 
     suspend fun refreshSuspend() {
         try { updateInstalledModList?.cancelAndJoin() } catch (_: CancellationException) {}
-        coroutineContext.ensureActive()
+        currentCoroutineContext().ensureActive()
         updateInstalledModList = coroutineScope.launch { doUpdateInstalledModList() }
         updateInstalledModList?.join()
     }

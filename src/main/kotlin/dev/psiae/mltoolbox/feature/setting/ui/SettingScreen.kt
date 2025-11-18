@@ -76,17 +76,10 @@ fun SettingScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(bottom = 16.dp)
                 .background(
                     animateColorAsState(
-                        if (LocalIsDarkTheme.current) {
-                            Material3Theme.colorScheme.surfaceContainer
-                        } else {
-                            MD3Theme.surfaceColorAtElevation(
-                                Material3Theme.colorScheme.surfaceContainerLow,
-                                Material3Theme.colorScheme.surfaceTint,
-                                1.dp
-                            )
-                        },
+                        Material3Theme.colorScheme.surfaceContainer,
                         animationSpec = tween(200)
                     ).value
                 )
@@ -109,10 +102,11 @@ private fun SettingScreenContent(
             val dest = remember {
                 mutableStateOf<StableList<MainDrawerDestination>>(StableList(listOf(personalization)), neverEqualPolicy())
             }
-
             Column(
                 modifier = Modifier
-                    .widthIn(max = 140.dp),
+                    .padding(horizontal = 4.dp)
+                    .widthIn(min = 120.dp, max = 160.dp)
+                    .padding(end = 24.dp)
             ) {
                 SettingScreenLayoutDrawerNavigationPanel(
                     state,
@@ -178,7 +172,6 @@ private fun SettingScreenContent(
                     )
                 }
             }
-            Spacer(modifier = Modifier.width(24.dp))
             MainScreenLayoutScreenHost(dest.value)
         }
     }

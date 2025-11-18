@@ -65,7 +65,6 @@ fun DirectInstallUEPakModScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .height(64.dp)
                         .fillMaxWidth()
                         .background(
                             color = MD3Theme.surfaceColorAtElevation(
@@ -75,35 +74,43 @@ fun DirectInstallUEPakModScreen(
                             )
                         )
                 ) {
-                    Row(
-                        modifier = Modifier.padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        Modifier.padding(bottom = 12.dp)
                     ) {
-                        SimpleTooltip(
-                            "go back"
+                        Row(
+                            modifier = Modifier,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .clickable(onClick = { directInstallModScreenState.userInputNavigateOutInstallUnrealEngineMod() })
-                                    .padding(vertical = 4.dp, horizontal = 4.dp)
+                            SimpleTooltip(
+                                "go back"
                             ) {
-                                Icon(
-                                    modifier = Modifier.size(20.dp),
-                                    painter = painterResource("drawable/arrow_left_simple_32px.png"),
-                                    tint = Material3Theme.colorScheme.onSurface,
-                                    contentDescription = null
-                                )
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                ) {
+                                    Box (
+                                        modifier = Modifier
+                                            .align(Alignment.Center)
+                                            .clickable(onClick = { directInstallModScreenState.userInputNavigateOutInstallUnrealEngineMod() })
+                                            .padding(2.dp)
+                                    ) {
+                                        Icon(
+                                            modifier = Modifier.size(24.dp),
+                                            painter = painterResource("drawable/arrow_left_simple_32px.png"),
+                                            tint = Material3Theme.colorScheme.onSurface,
+                                            contentDescription = null
+                                        )
+                                    }
+                                }
                             }
                         }
-
-                        WidthSpacer(16.dp)
-
-                        Row {
+                        Row(
+                            modifier = Modifier
+                                .padding(start = 16.dp)
+                        ) {
                             Text(
-                                "Install Unreal Engine Pak mod",
-                                style = Material3Theme.typography.headlineSmall.copy(
-                                    baselineShift = BaselineShift(-0.1f)
-                                ),
+                                "Install Unreal Engine Pak Mod",
+                                style = Material3Theme.typography.headlineMedium,
                                 color = Material3Theme.colorScheme.onSurface
                             )
                         }
@@ -118,7 +125,7 @@ fun DirectInstallUEPakModScreen(
                             .verticalScroll(scrollState)
                     ) {
                         Column {
-                            HeightSpacer(12.dp)
+                            HeightSpacer(16.dp)
                             Text(
                                 text = "Unreal Engine Pak Mod Installation",
                                 style = Material3Theme.typography.titleLarge,
@@ -219,10 +226,12 @@ private fun SelectModArchiveCard(
                         verticalArrangement = Arrangement.Center,
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(160.dp),
-                            color = Material3Theme.colorScheme.secondary
-                        )
+                        Box(modifier = Modifier.size(160.dp), contentAlignment = Alignment.Center) {
+
+                            ContainedLoadingIndicator(
+                                modifier = Modifier.size(60.dp)
+                            )
+                        }
                         HeightSpacer(30.dp)
                         Text(
                             modifier = Modifier,

@@ -6,8 +6,7 @@ build/
 
 /.idea/
 /.kotlin/
-/.obfuscation/**
-!/.obfuscation/.keep
+/obfuscation/
 
 ### IntelliJ IDEA ###
 .idea/modules.xml
