@@ -1,0 +1,21 @@
+CREATE TABLE Profile (
+    id INTEGER PRIMARY KEY NOT NULL,
+    uuid TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
+    is_done_setup INTEGER CHECK(is_done_setup IN (0, 1)) NOT NULL,
+    is_tombstoned INTEGER CHECK(is_tombstoned IN (0, 1)) NOT NULL
+);
+
+selectAll:
+SELECT *
+FROM Profile
+WHERE is_tombstoned = FALSE;
+
+selectByUuid:
+SELECT *
+FROM Profile
+WHERE uuid = :uuid;
+
+insert:
+INSERT INTO Profile(id, uuid, name, is_done_setup, is_tombstoned)
+VALUES (?, ?, ?, ?, ?);

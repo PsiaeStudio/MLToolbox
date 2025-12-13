@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package dev.psiae.mltoolbox.data.proto.user.profile;
+
+option java_package = "dev.psiae.mltoolbox.data.proto.user.profile";
+option java_multiple_files = true;
+option java_outer_classname = "ProfilePreferenceProto";
+
+message ProfilePreference {
+
+}

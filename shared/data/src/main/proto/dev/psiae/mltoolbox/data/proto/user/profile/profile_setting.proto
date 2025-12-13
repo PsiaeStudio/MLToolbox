@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package dev.psiae.mltoolbox.data.proto.user.profile;
+
+option java_package = "dev.psiae.mltoolbox.data.proto.user.profile";
+option java_multiple_files = true;
+option java_outer_classname = "ProfileSettingProto";
+
+message ProfileSetting {
+  Personalization personalization = 1;
+
+  message Personalization {
+    Theme theme = 1;
+
+    message Theme {
+      string design_system = 1;
+      string color_mode = 2;
+      string color_seed = 3;
+      string font_family = 4;
+    }
+  }
+}

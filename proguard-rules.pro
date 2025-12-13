@@ -16,6 +16,8 @@
 -keep class kotlinx.** {*;}
 -keep class java.** {*;}
 
+
+-dontwarn androidx.compose.**
 -dontwarn kotlinx.datetime.**
 
 -keep class net.sf.sevenzipjbinding.** {*;}

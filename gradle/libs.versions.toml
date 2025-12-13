@@ -1,5 +1,6 @@
 [versions]
 kotlin = "2.3.0-Beta1"
+kotlinx-coroutines = "1.10.2"
 kotlinx-serialization = "1.9.0"
 jetbrains-compose = "1.9.0-alpha02"
 jna = "5.18.1"
@@ -9,8 +10,14 @@ sqldelight = "2.1.0"
 protobuf = "0.9.5"
 protoc = "4.33.0"
 
+decompose = "3.4.0"
+navigation3 = "1.0.0"
+
 [libraries]
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-core-jvm = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core-jvm", version.ref = "kotlinx-coroutines" }
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version = "0.7.1" }
+kotlinx-io-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-io-core", version = "0.8.1" }
 kotlinx-serialization-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 
@@ -20,10 +27,15 @@ jetbrains-compose-material = { group = "org.jetbrains.compose.material", name = 
 jetbrains-compose-material3 = { group = "org.jetbrains.compose.material3", name = "material3", version.ref = "jetbrains-compose" }
 
 coil3-compose = { group = "io.coil-kt.coil3", name = "coil-compose", version = "3.3.0" }
+arkivanov-decompose = { group = "com.arkivanov.decompose", name = "decompose", version.ref = "decompose" }
+arkivanov-decompose-compose = { group = "com.arkivanov.decompose", name = "extensions-compose", version.ref = "decompose" }
+androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "navigation3" }
+androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "navigation3" }
 
 jna = { group = "net.java.dev.jna", name = "jna", version.ref = "jna" }
 jna-platform = { group = "net.java.dev.jna", name = "jna-platform", version.ref = "jna" }
 
+okio = { group = "com.squareup.okio", name = "okio", version = "3.16.2"}
 filekit-core = { group = "io.github.vinceglb", name = "filekit-core", version = "0.8.7" }
 
 zip4j = { group = "net.lingala.zip4j", name = "zip4j", version = "2.11.5" }

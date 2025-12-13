@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package dev.psiae.mltoolbox.data.proto.modmanager;
+
+option java_package = "dev.psiae.mltoolbox.data.proto.modmanager";
+option java_multiple_files = true;
+option java_outer_classname = "ModManagerPreferenceProto";
+
+message ModManagerPreference {
+
+}

@@ -5,11 +5,14 @@ pluginManagement {
         gradlePluginPortal()
         mavenCentral()
     }
+}
 
-    plugins {
-        kotlin("jvm").version(extra["kotlin.version"] as String)
-        id("org.jetbrains.compose").version(extra["compose.version"] as String)
-        id("org.jetbrains.kotlin.plugin.compose").version(extra["kotlin.version"] as String)
+dependencyResolutionManagement {
+    repositories {
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
+        google()
+        gradlePluginPortal()
+        mavenCentral()
     }
 }
 
@@ -19,3 +22,25 @@ plugins {
 
 
 rootProject.name = "MLToolbox"
+
+include("app")
+include("core")
+include("foundation")
+include("foundation:compress")
+include("foundation:db")
+include("foundation:fs")
+include("foundation:io")
+include("foundation:native")
+include("foundation:network")
+include("foundation:domain")
+include("foundation:ui")
+include("shared")
+include("shared:app")
+include("shared:data")
+include("shared:domain")
+include("shared:ui")
+include("feature")
+include("feature:forge")
+include("feature:gamemanager")
+include("feature:modmanager")
+include("feature:profile")
