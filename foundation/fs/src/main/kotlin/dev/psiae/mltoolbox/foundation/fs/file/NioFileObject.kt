@@ -12,6 +12,7 @@ import dev.psiae.mltoolbox.foundation.fs.native.windows.WindowsNativeFileAttribu
 import dev.psiae.mltoolbox.foundation.fs.path.JNioPath
 import dev.psiae.mltoolbox.foundation.fs.path.Path
 import dev.psiae.mltoolbox.foundation.fs.path.Path.Companion.toFsPath
+import org.w3c.dom.Attr
 import java.io.IOException
 import java.nio.channels.FileChannel
 import java.nio.file.CopyOption
@@ -164,16 +165,16 @@ class NioFileObject internal constructor(
                 jNioPath,
                 *run {
                     arrayOf<OpenOption>(
-                        if (!attributes.isReadOnly) StandardOpenOption.WRITE else StandardOpenOption.READ,
+                        StandardOpenOption.READ,
                         ExtendedOpenOption.NOSHARE_READ,
                         ExtendedOpenOption.NOSHARE_WRITE,
                         ExtendedOpenOption.NOSHARE_DELETE
                     ) + if (!followLinks) arrayOf(LinkOption.NOFOLLOW_LINKS) else emptyArray()
-                },
+                }
             ).use { fc ->
-                fc.tryLock()
+                /*fc.tryLock(0, Long.MAX_VALUE, attributes.isReadOnly)
                     ?.use {  }
-                    ?: throw IOException("Locked by another program")
+                    ?: throw IOException("Locked by another program")*/
             }
         }.catchOrRethrow { e ->
             when (e) {

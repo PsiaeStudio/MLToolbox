@@ -1,12 +1,8 @@
 package dev.psiae.mltoolbox.feature.modmanager.ui.compose.setup
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import dev.psiae.mltoolbox.shared.app.MLToolboxApp
+import androidx.compose.runtime.*
+import dev.psiae.mltoolbox.core.catchOrRethrow
+import dev.psiae.mltoolbox.core.logger.Logger
 import dev.psiae.mltoolbox.feature.modmanager.domain.model.ModManagerGameContext
 import dev.psiae.mltoolbox.feature.modmanager.domain.model.ModManagerGamePaths
 import dev.psiae.mltoolbox.foundation.fs.FileSystem
@@ -14,12 +10,14 @@ import dev.psiae.mltoolbox.foundation.fs.path.Path
 import dev.psiae.mltoolbox.foundation.fs.path.Path.Companion.orEmpty
 import dev.psiae.mltoolbox.foundation.fs.path.Path.Companion.toPath
 import dev.psiae.mltoolbox.foundation.fs.path.startsWith
+import dev.psiae.mltoolbox.shared.app.MLToolboxApp
 import dev.psiae.mltoolbox.shared.domain.model.GamePlatform
 import dev.psiae.mltoolbox.shared.domain.model.GameVersion
 import dev.psiae.mltoolbox.shared.domain.model.ManorLordsGameVersion
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okio.IOException
 
 @Composable
 fun rememberSetupGameContextPanelState(
@@ -168,45 +166,62 @@ class SetupGameContextPanelState(
         if (!isProcessingGamePickedFolder) {
             isProcessingGamePickedFolder = true
             coroutineScope.launch {
+                var isError = false
+                var errorMsg = ""
+                var currentSelectedGamePaths = selectedGamePathsOrThrow()
+                processingPickedGameFolderStatusMsg = "processing..."
                 withContext(Dispatchers.IO) {
-                    processingPickedGameFolderStatusMsg = "processing..."
+                    runCatching {
+                        val rootFolderPath = when (selectedPlatform) {
+                            GamePlatform.Steam, GamePlatform.EpicGamesStore, GamePlatform.GogCom -> folder
+                            GamePlatform.XboxPcGamePass -> folder / "Content"
+                        }.takeIf { path ->
+                            fs.file(path).let { it.exists() && it.followLinks().isDirectory() }
+                        }.orEmpty()
 
-                    val rootFolderPath = when (selectedPlatform) {
-                        GamePlatform.Steam, GamePlatform.EpicGamesStore, GamePlatform.GogCom -> folder
-                        GamePlatform.XboxPcGamePass -> folder / "Content"
-                    }.takeIf {
-                        fs.file(it).followLinks().isDirectory()
-                    }.orEmpty()
+                        val launcherFilePath = when (selectedPlatform) {
+                            GamePlatform.Steam, GamePlatform.EpicGamesStore, GamePlatform.GogCom -> folder / "ManorLords.exe"
+                            GamePlatform.XboxPcGamePass -> folder / "Content\\gamelaunchhelper.exe"
+                        }.takeIf { path ->
+                            fs.file(path).let { it.exists() && it.followLinks().isRegularFile() }
+                        }.orEmpty()
 
-                    val launcherFilePath = when (selectedPlatform) {
-                        GamePlatform.Steam, GamePlatform.EpicGamesStore, GamePlatform.GogCom -> folder / "ManorLords.exe"
-                        GamePlatform.XboxPcGamePass -> folder / "Content\\gamelaunchhelper.exe"
-                    }.takeIf {
-                        fs.file(it).followLinks().isRegularFile()
-                    }.orEmpty()
+                        val gameBinaryExeFilePath = when (selectedPlatform) {
+                            GamePlatform.Steam, GamePlatform.EpicGamesStore, GamePlatform.GogCom -> folder / "ManorLords\\Binaries\\Win64\\ManorLords-Win64-Shipping.exe"
+                            GamePlatform.XboxPcGamePass -> folder / "Content\\ManorLords\\Binaries\\WinGDK\\ManorLords-WinGDK-Shipping.exe"
+                        }.takeIf { path ->
+                            fs.file(path).let { it.exists() && it.followLinks().isRegularFile() }
+                        }.orEmpty()
 
-                    val gameBinaryExeFilePath = when (selectedPlatform) {
-                        GamePlatform.Steam, GamePlatform.EpicGamesStore, GamePlatform.GogCom -> folder / "ManorLords\\Binaries\\Win64\\ManorLords-Win64-Shipping.exe"
-                        GamePlatform.XboxPcGamePass -> folder / "Content\\ManorLords\\Binaries\\WinGDK\\ManorLords-WinGDK-Shipping.exe"
-                    }.takeIf {
-                        fs.file(it).followLinks().isRegularFile()
-                    }.orEmpty()
+                        val gamePaksFolder = when (selectedPlatform) {
+                            GamePlatform.Steam, GamePlatform.EpicGamesStore, GamePlatform.GogCom -> folder / "ManorLords\\Content\\Paks\\"
+                            GamePlatform.XboxPcGamePass -> folder / "Content\\ManorLords\\Content\\Paks\\"
+                        }.takeIf { path ->
+                            fs.file(path).let { it.exists() && it.followLinks().isDirectory() }
+                        }.orEmpty()
 
-                    val gamePaksFolder = when (selectedPlatform) {
-                        GamePlatform.Steam, GamePlatform.EpicGamesStore, GamePlatform.GogCom -> folder / "ManorLords\\Content\\Paks\\"
-                        GamePlatform.XboxPcGamePass -> folder / "Content\\ManorLords\\Content\\Paks\\"
-                    }.takeIf {
-                        fs.file(it).followLinks().isDirectory()
-                    }.orEmpty()
-
-                    selectedGamePaths = selectedGamePathsOrThrow().copy(
-                        root = rootFolderPath,
-                        launcher = launcherFilePath,
-                        binary = gameBinaryExeFilePath,
-                        paks = gamePaksFolder
-                    )
+                        currentSelectedGamePaths = currentSelectedGamePaths.copy(
+                            root = rootFolderPath,
+                            launcher = launcherFilePath,
+                            binary = gameBinaryExeFilePath,
+                            paks = gamePaksFolder
+                        )
+                    }.catchOrRethrow { e ->
+                        Logger.tryLog { e.stackTraceToString() }
+                        if (e is IOException) {
+                            isError = true
+                            errorMsg = "IO Error, see log for details"
+                            return@withContext
+                        }
+                    }
                 }
-                alreadySelectedGameInstallFolder = true
+                selectedGamePaths = currentSelectedGamePaths
+                if (isError) {
+                    pickedGameFolderErr = true
+                    pickedGameFolderErrMsg = errorMsg
+                } else {
+                    alreadySelectedGameInstallFolder = true
+                }
                 isProcessingGamePickedFolder = false
             }
         }

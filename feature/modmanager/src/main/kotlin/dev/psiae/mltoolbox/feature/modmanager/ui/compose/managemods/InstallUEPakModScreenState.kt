@@ -213,6 +213,11 @@ class InstallUEPakModScreenState(
                 }
             }
         }
+
+        coroutineScope.launch {
+            _pickUe4ssModArchiveCompletion?.await()
+        }
+
         updateState { state ->
             state.updateCanNavigateBack()
         }

@@ -184,6 +184,9 @@ class InstallUe4ssScreenState(
                 }
             }
         }
+        coroutineScope.launch {
+            _pickUe4ssArchiveCompletion?.await()
+        }
         updateState { state ->
             state.updateCanNavigateBack()
         }

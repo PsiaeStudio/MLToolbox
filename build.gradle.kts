@@ -1,5 +1,5 @@
 group = "dev.psiae"
-version = "1.0.1-alpha.6"
+version = "1.0.1-alpha.7"
 
 plugins {
     alias(libs.plugins.jetbrains.kotlin.jvm)

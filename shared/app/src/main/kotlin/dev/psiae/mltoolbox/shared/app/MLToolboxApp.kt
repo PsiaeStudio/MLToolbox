@@ -10,8 +10,8 @@ class MLToolboxApp {
         private val INSTANCE = LazyConstructor<MLToolboxApp>()
         private val EXE_PATH = LazyConstructor<String>()
 
-        const val RELEASE_VERSION = "1.0.1-alpha.6"
-        const val DEV_VERSION = "1.0.1-alpha.6-dev.20251213.1"
+        const val RELEASE_VERSION = "1.0.1-alpha.7"
+        const val DEV_VERSION = "1.0.1-alpha.7-dev.20251214.1"
         const val IS_DEV = false
 
         val version = if (IS_DEV) DEV_VERSION else RELEASE_VERSION

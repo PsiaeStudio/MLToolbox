@@ -209,6 +209,9 @@ class InstallUe4ssModScreenState(
                 }
             }
         }
+        coroutineScope.launch {
+            _pickUe4ssModArchiveCompletion?.await()
+        }
         updateState { state ->
             state.updateCanNavigateBack()
         }
@@ -232,6 +235,11 @@ class InstallUe4ssModScreenState(
         var errorStatusMessage = ""
         val processedSuccessfully = withContext(dispatch.ioDispatcher) {
             runInterruptible { runCatching {
+
+                updateStateBlocking { state ->
+                    state.statusMessage = "preparing extract dirs ..."
+                }
+
                 if (fs.exists(extractDirPath)) {
                     if (!fs.file(extractDirPath).canDeleteRecursively()) {
                         errorStatusMessage = "Unable to lock 'ue4ss_mods_install' dir, might be used somewhere else"

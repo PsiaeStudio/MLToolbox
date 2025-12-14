@@ -86,18 +86,29 @@ class InstallModScreenState(
 
     private suspend fun isUe4ssInstalled(): Boolean = withContext(context.dispatch.ioDispatcher) {
         runCatching {
-            val binaryFile = gameContext.paths.binary.takeIf { fs.file(it).followLinks().isRegularFile() }
-                ?: return@withContext false
-            val binaryFolder = binaryFile.parent?.takeIf { fs.file(it).followLinks().isDirectory() }
-                ?: return@withContext false
-            val proxyDll = binaryFolder.resolve("dwmapi.dll").takeIf { fs.file(it).followLinks().isRegularFile() }
-                ?: return@withContext false
-            val ue4ssFolder = binaryFolder.resolve("ue4ss").takeIf { fs.file(it).followLinks().isDirectory() }
-                ?: return@withContext false
-            val ue4ssDll = ue4ssFolder.resolve("UE4SS.dll").takeIf { fs.file(it).followLinks().isRegularFile() }
-                ?: return@withContext false
-            val modsFolder = ue4ssFolder.resolve("Mods").takeIf { fs.file(it).followLinks().isDirectory() }
-                ?: return@withContext false
+            val binaryFile = gameContext.paths.binary.takeIf { path ->
+                fs.file(path).let { it.exists() && it.followLinks().isRegularFile() }
+            } ?: return@withContext false
+
+            val binaryFolder = binaryFile.parent?.takeIf { path ->
+                fs.file(path).let { it.exists() && it.followLinks().isDirectory() }
+            } ?: return@withContext false
+
+            val proxyDll = binaryFolder.resolve("dwmapi.dll").takeIf { path ->
+                fs.file(path).let { it.exists() && it.followLinks().isRegularFile() }
+            } ?: return@withContext false
+
+            val ue4ssFolder = binaryFolder.resolve("ue4ss").takeIf { path ->
+                fs.file(path).let { it.exists() && it.followLinks().isDirectory() }
+            } ?: return@withContext false
+
+            val ue4ssDll = ue4ssFolder.resolve("UE4SS.dll").takeIf { path ->
+                fs.file(path).let { it.exists() && it.followLinks().isRegularFile() }
+            } ?: return@withContext false
+
+            val modsFolder = ue4ssFolder.resolve("Mods").takeIf { path ->
+                fs.file(path).let { it.exists() && it.followLinks().isDirectory() }
+            } ?: return@withContext false
         }.catchOrRethrow { e ->
             when (e) {
                 is IOException -> return@withContext false
