@@ -19,6 +19,8 @@ abstract class FileSystem {
     abstract fun file(vararg path: Path): FileObject
     abstract fun file(path: Path, vararg pathString: String): FileObject
 
+    abstract fun isValidPath(path: Path): Boolean
+
     /**
      * Returns the canonicalized path of an existing file.
      *

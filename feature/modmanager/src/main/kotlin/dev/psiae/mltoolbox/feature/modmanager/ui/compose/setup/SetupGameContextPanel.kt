@@ -77,8 +77,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.psiae.mltoolbox.core.catchOrRethrow
 import dev.psiae.mltoolbox.core.utils.ensureSuffix
 import dev.psiae.mltoolbox.foundation.fs.path.Path
+import dev.psiae.mltoolbox.foundation.fs.path.Path.Companion.platformSlashSeparated
 import dev.psiae.mltoolbox.foundation.fs.path.Path.Companion.toFsPath
 import dev.psiae.mltoolbox.foundation.fs.path.Path.Companion.toPath
 import dev.psiae.mltoolbox.foundation.fs.path.endsWith
@@ -99,6 +101,7 @@ import io.github.vinceglb.filekit.core.FileKitPlatformSettings
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.withContext
+import java.io.IOException
 import java.lang.IllegalStateException
 
 @Composable
@@ -1173,8 +1176,11 @@ private fun GamePathFieldEdit(
     val latestRequireStartsWith by rememberUpdatedState(requireStartsWith)
     val isValidStartsWith by remember {
         derivedStateOf {
-            val text = textFieldState.text
-            !text.isBlank() && text.toString().toPath().startsWith(latestRequireStartsWith)
+            val textStr = textFieldState.text
+            if (textStr.isBlank())
+                return@derivedStateOf false
+            latestRequireStartsWith.isEmpty ||
+                textStr.toString().toPath().platformSlashSeparated().startsWith(latestRequireStartsWith.platformSlashSeparated())
         }
     }
     val latestRequireEndsWith by rememberUpdatedState(requireEndsWith)
@@ -1186,14 +1192,15 @@ private fun GamePathFieldEdit(
             if (textStr.isBlank())
                 return@derivedStateOf false
             val path = textStr.toPath(true)
-            if (latestRequireEndsWithIsExtension) {
-                path.endsWith(latestRequireEndsWith) &&
-                    textStr.substringBeforeLast(latestRequireEndsWith.toString())
-                        .takeLastWhile { it != '\\' && it != '/' }
-                        .isNotEmpty()
-            } else {
-                path.endsWith(latestRequireEndsWith)
-            }
+            latestRequireEndsWith.isEmpty ||
+                if (latestRequireEndsWithIsExtension) {
+                    textStr.endsWith(latestRequireEndsWith.toString()) &&
+                        textStr
+                            .takeLastWhile { it != '\\' && it != '/' }
+                            .isNotEmpty()
+                } else {
+                    path.platformSlashSeparated().endsWith(latestRequireEndsWith.platformSlashSeparated())
+                }
         }
     }
     val isValidFileType by remember(
@@ -1204,21 +1211,23 @@ private fun GamePathFieldEdit(
         mutableStateOf(false)
     }.apply {
         LaunchedEffect(this) {
-            if (requireIsFile || requireIsDirectory)
-                withContext(state.ioDispatcher) {
-                    value = with(state.fs) {
-                        textFieldState.text.toString().toPath().file().let {
-                            if (requireIsFile) it.isRegularFile() else it.isDirectory()
+            runCatching {
+                if (requireIsFile || requireIsDirectory)
+                    withContext(state.ioDispatcher) {
+                        value = with(state.fs) {
+                            val path = textFieldState.text.toString().toPath()
+                            isValidPath(path) &&
+                                path.file().let { if (requireIsFile) it.isRegularFile() else it.isDirectory() }
                         }
                     }
-                }
+            }.catchOrRethrow { e ->
+                if (e is IOException)
+                    return@LaunchedEffect
+            }
         }
     }
-    val isValid by remember {
-        derivedStateOf {
-            isValidStartsWith and isValidEndsWith and isValidFileType
-        }
-    }
+
+    val isValid = isValidStartsWith and isValidEndsWith and isValidFileType
     val textField = @Composable {
         val interactionSource = remember { MutableInteractionSource() }
         OutlinedTextField(
@@ -1275,7 +1284,7 @@ private fun GamePathFieldEdit(
                             append("Ends with ")
                             withStyle(Material3Theme.typography.labelMedium.toSpanStyle()) {
                                 append(with(state.fs) {
-                                    requireStartsWith.absolute().invariantSeparatorsPathString.let {
+                                    requireEndsWith.invariantSeparatorsPathString.let {
                                         if (requireEndsWithIsDirectory)
                                             it.ensureSuffix('/')
                                         else it
@@ -1283,7 +1292,7 @@ private fun GamePathFieldEdit(
                                 })
                             }
                         },
-                        color = if (isValidStartsWith)
+                        color = if (isValidEndsWith)
                             Material3Theme.colorScheme.onSurfaceVariant
                         else
                             Material3Theme.colorScheme.error,
@@ -1329,7 +1338,7 @@ private fun GamePathFieldEdit(
         example,
         cancel,
     ) {
-        done(textFieldState.text.toString().toPath())
+        done(textFieldState.text.toString().toPath().platformSlashSeparated())
     }
 }
 
@@ -1635,8 +1644,7 @@ private fun SelectGameVersion(
                             modifier = Modifier.align(Alignment.CenterVertically),
                             text = when (state.selectedGameVersion) {
                                 is ManorLordsGameVersion.Custom -> "Custom"
-                                ManorLordsGameVersion.V_0_8_049-> "0.8.049 (Beta)"
-                                ManorLordsGameVersion.V_0_8_035 -> "0.8.035 (Beta)"
+                                ManorLordsGameVersion.V_0_8_050-> "0.8.050 (Beta)"
                                 ManorLordsGameVersion.V_0_8_029a -> "0.8.029a"
                                 else -> state.selectedGameVersion?.versionStr ?: ""
                             },
@@ -1665,35 +1673,16 @@ private fun SelectGameVersion(
                                         Row(
                                             Modifier.height(48.dp)
                                                 .fillMaxWidth()
-                                                .clickable(state.selectedGameVersion != ManorLordsGameVersion.V_0_8_049) {
-                                                    state.selectGameVersion(ManorLordsGameVersion.V_0_8_049)
+                                                .clickable(state.selectedGameVersion != ManorLordsGameVersion.V_0_8_050) {
+                                                    state.selectGameVersion(ManorLordsGameVersion.V_0_8_050)
                                                 }
-                                                .then(if (state.selectedGameVersion == ManorLordsGameVersion.V_0_8_049) Modifier.background(
+                                                .then(if (state.selectedGameVersion == ManorLordsGameVersion.V_0_8_050) Modifier.background(
                                                     Material3Theme.colorScheme.secondaryContainer) else Modifier)
                                                 .padding(horizontal = 12.dp)
                                         ) {
                                             Text(
                                                 modifier = Modifier.align(Alignment.CenterVertically),
-                                                text = "0.8.049 (Beta)",
-                                                color = Material3Theme.colorScheme.onSurface,
-                                                fontWeight = FontWeight.SemiBold,
-                                                style = Material3Theme.typography.labelLarge
-                                            )
-                                            Spacer(Modifier.weight(1f))
-                                        }
-                                        Row(
-                                            Modifier.height(48.dp)
-                                                .fillMaxWidth()
-                                                .clickable(state.selectedGameVersion != ManorLordsGameVersion.V_0_8_035) {
-                                                    state.selectGameVersion(ManorLordsGameVersion.V_0_8_035)
-                                                }
-                                                .then(if (state.selectedGameVersion == ManorLordsGameVersion.V_0_8_035) Modifier.background(
-                                                    Material3Theme.colorScheme.secondaryContainer) else Modifier)
-                                                .padding(horizontal = 12.dp)
-                                        ) {
-                                            Text(
-                                                modifier = Modifier.align(Alignment.CenterVertically),
-                                                text = "0.8.035 (beta)",
+                                                text = "0.8.050 (Beta)",
                                                 color = Material3Theme.colorScheme.onSurface,
                                                 fontWeight = FontWeight.SemiBold,
                                                 style = Material3Theme.typography.labelLarge

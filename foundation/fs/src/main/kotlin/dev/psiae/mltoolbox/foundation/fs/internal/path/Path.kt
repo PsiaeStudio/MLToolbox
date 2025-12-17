@@ -58,6 +58,32 @@ private fun Path.rootLength(): Int {
   return -1
 }
 
+private fun Path.rootLengthWin(): Int {
+  if (bytes.size == 0) return -1
+  if (bytes[0] == '/'.code.toByte()) return 1
+
+  if (bytes[0] == '\\'.code.toByte()) {
+    if (bytes.size > 2 && bytes[1] == '\\'.code.toByte()) {
+      // Look for a root like `\\localhost`.
+      var uncRootEnd = bytes.indexOf(BACKSLASH, fromIndex = 2)
+      if (uncRootEnd == -1) uncRootEnd = bytes.size
+      return uncRootEnd
+    }
+
+    // We found a root like `\`.
+    return 1
+  }
+
+  // Look for a root like `C:\`.
+  if (bytes.size > 2 && bytes[1] == ':'.code.toByte() && bytes[2] == '\\'.code.toByte()) {
+    val c = bytes[0].toInt().toChar()
+    if (c !in 'a'..'z' && c !in 'A'..'Z') return -1
+    return 3
+  }
+
+  return -1
+}
+
 @Suppress("NOTHING_TO_INLINE")
 internal inline fun Path.isAbsolute(): Boolean {
   return rootLength() != -1
@@ -363,4 +389,16 @@ private fun Buffer.startsWithVolumeLetterAndColon(slash: ByteString): Boolean {
     if (get(1) != ':'.code.toByte()) return false
     val b = get(0).toInt().toChar()
     return b in 'a'..'z' || b in 'A'..'Z'
+}
+
+internal fun Path.forwardSlashSeparatedImpl(): Path {
+    val slash = slash ?: SLASH
+    if (slash == SLASH) return this
+    return toString().replace(BACKSLASH.utf8(), SLASH.utf8()).toPath()
+}
+
+internal fun Path.backslashSeparatedImpl(): Path {
+    val slash = slash ?: BACKSLASH
+    if (slash == BACKSLASH) return this
+    return toString().replace(SLASH.utf8(), BACKSLASH.utf8()).toPath()
 }

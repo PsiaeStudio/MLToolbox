@@ -1,6 +1,7 @@
 package dev.psiae.mltoolbox.foundation.fs.path
 
 import dev.psiae.mltoolbox.foundation.fs.file.JFile
+import dev.psiae.mltoolbox.foundation.fs.internal.path.backslashSeparatedImpl
 import dev.psiae.mltoolbox.foundation.fs.internal.path.isAbsolute
 import dev.psiae.mltoolbox.foundation.fs.internal.path.isRelative
 import dev.psiae.mltoolbox.foundation.fs.internal.path.name
@@ -11,6 +12,7 @@ import dev.psiae.mltoolbox.foundation.fs.internal.path.resolveImpl
 import dev.psiae.mltoolbox.foundation.fs.internal.path.root
 import dev.psiae.mltoolbox.foundation.fs.internal.path.segments
 import dev.psiae.mltoolbox.foundation.fs.internal.path.segmentsBytes
+import dev.psiae.mltoolbox.foundation.fs.internal.path.forwardSlashSeparatedImpl
 import dev.psiae.mltoolbox.foundation.fs.internal.path.toPath
 import dev.psiae.mltoolbox.foundation.fs.internal.path.volumeLetter
 import okio.Buffer
@@ -130,5 +132,9 @@ class Path internal constructor(
         inline fun Path.ifEmpty(defaultValue: () -> Path): Path {
             return if (isEmpty) defaultValue() else this
         }
+
+        fun Path.forwardSlashSeparated() = forwardSlashSeparatedImpl()
+        fun Path.backslashSeparated() = backslashSeparatedImpl()
+        fun Path.platformSlashSeparated(): Path = backslashSeparatedImpl()
     }
 }

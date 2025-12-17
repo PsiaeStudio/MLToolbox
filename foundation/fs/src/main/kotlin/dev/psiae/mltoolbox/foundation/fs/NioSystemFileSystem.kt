@@ -13,6 +13,7 @@ import dev.psiae.mltoolbox.foundation.fs.path.Path
 import dev.psiae.mltoolbox.foundation.fs.path.Path.Companion.toFsPath
 import java.io.IOException
 import java.nio.file.Files
+import java.nio.file.InvalidPathException
 import java.util.stream.Collectors
 import kotlin.io.path.createDirectory
 import kotlin.io.path.createFile
@@ -39,6 +40,15 @@ class NioSystemFileSystem internal constructor(): JvmSystemFileSystem() {
             pathString.fold(path) { acc, path -> acc / path },
             this
         )
+    }
+
+    override fun isValidPath(path: Path): Boolean {
+        try {
+            path.toJNioPath()
+        } catch (_: InvalidPathException) {
+            return false
+        }
+        return true
     }
 
     override fun canonicalize(path: Path): Path {

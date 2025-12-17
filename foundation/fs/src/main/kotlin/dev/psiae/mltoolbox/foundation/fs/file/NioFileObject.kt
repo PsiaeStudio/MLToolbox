@@ -30,7 +30,7 @@ class NioFileObject internal constructor(
     override val fs: NioSystemFileSystem
 ) : JvmFileObject(path, fs) {
 
-    private val jNioPath = path.toJNioPath()
+    private val jNioPath by lazy(LazyThreadSafetyMode.NONE) { path.toJNioPath() }
 
     override fun metadataOrNull(
         followLinks: Boolean

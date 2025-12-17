@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.SnackbarHost
@@ -40,8 +39,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ClipEntry
-import androidx.compose.ui.platform.ClipMetadata
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalDensity
@@ -153,11 +150,8 @@ private fun GameDirectoriesCard(
                                 is ManorLordsGameVersion.V_0_8_029a, ManorLordsGameVersion.V_0_8_032 -> {
                                     version.versionStr + " (Early Access)"
                                 }
-                                is ManorLordsGameVersion.V_0_8_035 -> {
-                                    "v0.8.035 (Early Access | Beta)"
-                                }
-                                is ManorLordsGameVersion.V_0_8_049 -> {
-                                    "v0.8.049 (Early Access | Beta)"
+                                is ManorLordsGameVersion.V_0_8_050 -> {
+                                    "v0.8.050 (Early Access | Beta)"
                                 }
                             }
                         }
