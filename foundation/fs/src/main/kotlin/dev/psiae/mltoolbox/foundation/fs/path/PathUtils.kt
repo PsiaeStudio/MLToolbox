@@ -1,5 +1,7 @@
 package dev.psiae.mltoolbox.foundation.fs.path
 
+import dev.psiae.mltoolbox.foundation.fs.path.Path.Companion.toPath
+
 fun Path.startsWith(
     other: Path,
     normalize: Boolean = true
@@ -17,6 +19,11 @@ fun Path.startsWith(
 
     return this.segments.subList(0, other.segments.size) == other.segments
 }
+
+fun Path.startsWith(
+    other: String,
+    normalize: Boolean = true
+): Boolean = startsWith(other.toPath(), normalize)
 
 fun Path.endsWith(
     other: Path,

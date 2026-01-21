@@ -55,11 +55,14 @@ import dev.psiae.mltoolbox.core.utils.ensureSuffix
 import dev.psiae.mltoolbox.feature.modmanager.ui.compose.ModManagerScreenState
 import dev.psiae.mltoolbox.foundation.fs.AccessDeniedException
 import dev.psiae.mltoolbox.foundation.fs.path.Path
+import dev.psiae.mltoolbox.foundation.fs.path.Path.Companion.toFsPath
 import dev.psiae.mltoolbox.foundation.fs.path.invariantSeparatorsPathString
+import dev.psiae.mltoolbox.foundation.fs.path.startsWith
 import dev.psiae.mltoolbox.foundation.ui.compose.HeightSpacer
 import dev.psiae.mltoolbox.foundation.ui.compose.WidthSpacer
 import dev.psiae.mltoolbox.foundation.ui.compose.theme.md3.LocalIsDarkTheme
 import dev.psiae.mltoolbox.foundation.ui.compose.theme.md3.Material3Theme
+import dev.psiae.mltoolbox.shared.app.MLToolboxApp
 import dev.psiae.mltoolbox.shared.domain.model.ManorLordsGameVersion
 import dev.psiae.mltoolbox.shared.ui.compose.SimpleTooltip
 import kotlinx.coroutines.Job
@@ -71,6 +74,7 @@ import kotlinx.coroutines.withContext
 import okio.IOException
 import java.awt.datatransfer.StringSelection
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.io.path.getLastModifiedTime
 import kotlin.io.path.readText
 import kotlin.text.appendLine
 
@@ -104,6 +108,8 @@ private fun DashboardScreen(
                 }
                 HeightSpacer(16.dp)
                 CopyUe4ssLogToClipboardCard(state, snackbar)
+                HeightSpacer(4.dp)
+                CopyAppLogToClipboardCard(state, snackbar)
             }
             SnackbarHost(
                 modifier = Modifier.align(Alignment.BottomCenter),
@@ -147,11 +153,8 @@ private fun GameDirectoriesCard(
                                 is ManorLordsGameVersion.Custom -> {
                                     version.customVersionStr + " (Custom)"
                                 }
-                                is ManorLordsGameVersion.V_0_8_029a, ManorLordsGameVersion.V_0_8_032 -> {
-                                    version.versionStr + " (Early Access)"
-                                }
                                 is ManorLordsGameVersion.V_0_8_050 -> {
-                                    "v0.8.050 (Early Access | Beta)"
+                                    "v0.8.050 (Early Access)"
                                 }
                             }
                         }
@@ -934,6 +937,145 @@ private fun CopyUe4ssLogToClipboardCard(
                             canCopy = false
                             cantCopyReason = "Log file does not exist"
                         }
+                    }
+                }
+            }.catchOrRethrow { e ->
+                if (e is IOException) {
+                    canCopy = false
+                    cantCopyReason = when (e) {
+                        is AccessDeniedException -> "IO error (Access Denied)"
+                        else -> "IO error"
+                    }
+                    return@run
+                }
+            } }
+            delay(1000)
+        }
+    }
+}
+
+@Composable
+private fun CopyAppLogToClipboardCard(
+    screenState: DashboardScreenState,
+    snackbarState: SnackbarHostState
+) {
+    var canCopy by remember { mutableStateOf(false) }
+    var cantCopyReason by remember { mutableStateOf<String?>(null) }
+
+    val clipboard = checkNotNull(LocalClipboard.current.awtClipboard) {
+        "no awt clipboard"
+    }
+    val coroutineScope = rememberCoroutineScope()
+    var lastCopyJob by remember {
+        mutableStateOf<Job?>(null)
+    }
+
+    val content = @Composable {
+        FilledTonalButton(
+            onClick = {
+                lastCopyJob?.cancel()
+                if (lastCopyJob?.isActive != true) {
+                    lastCopyJob = coroutineScope.launch {
+
+                        fun naturalCompare(s1: String, s2: String): Int {
+                            val splitRegex = Regex("(?<=\\D)(?=\\d)|(?<=\\d)(?=\\D)")
+
+                            val segments1 = s1.split(splitRegex)
+                            val segments2 = s2.split(splitRegex)
+
+                            val length = minOf(segments1.size, segments2.size)
+
+                            for (i in 0 until length) {
+                                val part1 = segments1[i]
+                                val part2 = segments2[i]
+
+                                val isNum1 = part1[0].isDigit()
+                                val isNum2 = part2[0].isDigit()
+
+                                val result = if (isNum1 && isNum2) {
+                                    val num1 = part1.toBigIntegerOrNull() ?: part1.length.compareTo(part2.length).toBigInteger()
+                                    val num2 = part2.toBigIntegerOrNull() ?: part2.length.compareTo(part1.length).toBigInteger()
+                                    num1.compareTo(num2)
+                                } else {
+                                    part1.compareTo(part2, ignoreCase = true)
+                                }
+
+                                if (result != 0) return result
+                            }
+
+                            return segments1.size - segments2.size
+                        }
+
+                        val fs = screenState.fs
+                        var text: String? = null
+                        runCatching {
+                            withContext(screenState.model.context.dispatch.ioDispatcher) {
+                                val logsFolder = fs.file(MLToolboxApp.logsDir.toFsPath())
+                                if (logsFolder.exists() && logsFolder.isDirectory(followLinks = true)) {
+                                    fs.list(logsFolder.path).filter {
+                                        it.name.startsWith("log.") && it.name.endsWith(".txt")
+                                    }.sortedWith { p1, p2 ->
+                                        p1.toJNioPath().getLastModifiedTime().compareTo(p2.toJNioPath().getLastModifiedTime())
+                                    }.lastOrNull()?.let { logFile ->
+                                        text = logFile.toJNioPath().readText()
+                                    }
+                                }
+                            }
+                        }.catchOrRethrow { e ->
+                            if (e !is CancellationException)
+                                Logger.tryLog { e.stackTraceToString() }
+                            if (e is IOException) {
+                                snackbarState.currentSnackbarData?.dismiss()
+                                snackbarState.showSnackbar("Unable to read logs, IO error")
+                                return@launch
+                            }
+                        }
+                        if (text != null) {
+                            clipboard.setContents(StringSelection(text), null)
+                            snackbarState.currentSnackbarData?.dismiss()
+                            snackbarState.showSnackbar("Copied to clipboard", withDismissAction = true)
+                        }
+                    }
+                }
+            },
+            enabled = canCopy
+        ) {
+            Text(
+                "Copy App log",
+                style = Material3Theme.typography.labelMedium,
+                color = Material3Theme.colorScheme.onSecondaryContainer.copy(
+                    alpha = if (canCopy) 1f else 0.38f
+                ),
+            )
+        }
+    }
+    if (canCopy) {
+        content()
+    } else {
+        SimpleTooltip(
+            text = cantCopyReason?.ifEmpty { null } ?: "Can't copy",
+            content = content
+        )
+    }
+
+    LaunchedEffect(screenState) {
+        val fs = screenState.fs
+        while (currentCoroutineContext().isActive) {
+            run { runCatching {
+                withContext(screenState.model.context.dispatch.ioDispatcher) {
+                    val logsFolder = fs.file(MLToolboxApp.logsDir.toFsPath())
+                    if (
+                        logsFolder.exists() &&
+                        logsFolder.isDirectory(followLinks = true) &&
+                        fs.list(logsFolder.path).any {
+                            it.name.startsWith("log.") && it.name.endsWith(".txt")
+                        }
+                    ) {
+                        canCopy = true
+                        cantCopyReason = null
+                    } else {
+                        canCopy = false
+                        cantCopyReason = "Log file does not exist"
                     }
                 }
             }.catchOrRethrow { e ->

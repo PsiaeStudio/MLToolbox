@@ -278,7 +278,7 @@ class InstallUe4ssModScreenState(
                 var needLogicModsFolder = false
                 listExtractDirectory.forEach { folderPath ->
                     val listFiles = fs.list(folderPath)
-                    if (listFiles.isEmpty() || listFiles.size > 1 || !fs.file(listFiles.first()).isDirectory()) {
+                    if (listFiles.isEmpty() || listFiles.size > 1 || !fs.file(listFiles.first()).let { it.exists() && it.followLinks().isDirectory() }) {
                         errorStatusMessage = "'${folderPath.name}' must only contain one root directory, given archive is not a UE4SS mod"
                         return@runInterruptible false
                     }
@@ -315,13 +315,13 @@ class InstallUe4ssModScreenState(
                 }
 
                 val gameDir = model.gameContext.paths.binary.parent
-                if (gameDir == null || !fs.file(gameDir).followLinks().isDirectory()) {
+                if (gameDir == null || !fs.file(gameDir).let { it.exists() && it.followLinks().isDirectory()}) {
                     errorStatusMessage = "missing game directory"
                     return@runInterruptible false
                 }
 
                 val ue4ssDir = gameDir / "ue4ss"
-                if (!fs.file(ue4ssDir).followLinks().isDirectory()) {
+                if (!fs.file(ue4ssDir).let { it.exists() && it.followLinks().isDirectory() }) {
                     errorStatusMessage = "missing ue4ss directory, make sure 'RE-UE4SS' Mod Loader is already installed"
                     return@runInterruptible false
                 }
@@ -331,7 +331,7 @@ class InstallUe4ssModScreenState(
                 }
 
                 val modsDir = ue4ssDir / "mods"
-                if (!fs.file(modsDir).followLinks().isDirectory()) {
+                if (!fs.file(modsDir).let { it.exists() && it.followLinks().isDirectory() }) {
                     errorStatusMessage = "missing ue4ss/Mods directory"
                     return@runInterruptible false
                 }
@@ -353,12 +353,12 @@ class InstallUe4ssModScreenState(
                         state.statusMessage = "verifying LogicMods dir ..."
                     }
                     val paksDirPath = model.gameContext.paths.paks
-                    if (!fs.file(paksDirPath).followLinks().isDirectory()) {
+                    if (!fs.file(paksDirPath).let { it.exists() && it.followLinks().isDirectory() }) {
                         errorStatusMessage = "'Paks' folder does not exist"
                         return@runInterruptible false
                     }
                     val logicsModDirPath = paksDirPath / "LogicMods"
-                    if (fs.file(logicsModDirPath).followLinks().isDirectory()) {
+                    if (fs.file(logicsModDirPath).let { it.exists() && it.followLinks().isDirectory() }) {
                         modsToBeInstalledNames.forEach { e ->
                             val targetFilePath = logicsModDirPath / "$e.pak"
                             if (fs.exists(targetFilePath))
@@ -367,12 +367,12 @@ class InstallUe4ssModScreenState(
                                     return@runInterruptible false
                                 }
 
-                            /*val targetFolderPath = logicsModDirPath / e
+                            val targetFolderPath = logicsModDirPath / e
                             if (fs.exists(targetFolderPath))
                                 if (!fs.file(targetFolderPath).canDeleteRecursively()) {
                                     errorStatusMessage = "Unable to lock LogicMods folder for deletion: $e"
                                     return@runInterruptible false
-                                }*/
+                                }
                         }
                     }
 
@@ -394,7 +394,7 @@ class InstallUe4ssModScreenState(
                     val paksDirPath = model.gameContext.paths.paks
                     val logicsModDirPath = paksDirPath / "LogicMods"
                     if (fs.file(logicsModDirPath).exists()) {
-                        if (!fs.file(logicsModDirPath).followLinks().isDirectory()) {
+                        if (!fs.file(logicsModDirPath).isDirectory(followLinks = true)) {
                             fs.file(logicsModDirPath).deleteRecursively()
                             fs.createDirectory(logicsModDirPath)
                         }
@@ -425,12 +425,17 @@ class InstallUe4ssModScreenState(
 
                 modsToBeInstalledDir.forEach { e ->
                     val ae_bp = e / "ae_bp"
-                    if (fs.file(ae_bp).isDirectory()) {
+                    if (fs.file(ae_bp).isDirectory(followLinks = true)) {
                         val modBP  = ae_bp / "${e.name}.pak"
                         if (fs.exists(modBP)) {
                             val paksDirPath = model.gameContext.paths.paks
                             val logicsModDirPath = paksDirPath / "LogicMods"
-                            fs.file(modBP).copyTo(logicsModDirPath / modBP.name)
+                            val modFolder = logicsModDirPath / e.name
+                            fs.file(modFolder).deleteRecursively()
+                            fs.createDirectory(modFolder)
+                            fs.list(ae_bp).forEach { e ->
+                                fs.file(e).copyToRecursively(modFolder / e.name)
+                            }
                         }
                     }
                 }

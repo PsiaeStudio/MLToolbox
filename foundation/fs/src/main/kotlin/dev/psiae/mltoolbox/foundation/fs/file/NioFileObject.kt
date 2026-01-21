@@ -9,6 +9,7 @@ import dev.psiae.mltoolbox.foundation.fs.NoSuchFileException
 import dev.psiae.mltoolbox.foundation.fs.jnio.JNioFileSystemException
 import dev.psiae.mltoolbox.foundation.fs.jnio.JNioNoSuchFileException
 import dev.psiae.mltoolbox.foundation.fs.native.windows.WindowsNativeFileAttributes
+import dev.psiae.mltoolbox.foundation.fs.native.windows.WindowsPath
 import dev.psiae.mltoolbox.foundation.fs.path.JNioPath
 import dev.psiae.mltoolbox.foundation.fs.path.Path
 import dev.psiae.mltoolbox.foundation.fs.path.Path.Companion.toFsPath
@@ -186,7 +187,7 @@ class NioFileObject internal constructor(
 
     override fun tryChangeAttributeForDelete(): Boolean {
         runCatching {
-            WindowsNativeFileAttributes.checkCanWriteAttributes(path)
+            WindowsNativeFileAttributes.checkCanWriteAttributes(WindowsPath(fs, path))
         }.catchOrRethrow { e ->
             when (e) {
                 is IOException -> return false

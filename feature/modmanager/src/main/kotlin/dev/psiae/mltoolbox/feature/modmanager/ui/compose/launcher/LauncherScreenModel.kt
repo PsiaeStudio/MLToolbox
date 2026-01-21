@@ -68,12 +68,7 @@ class LauncherScreenModel(
             launchingStatusMsg = "Launching ..."
             runCatching {
                 val exe = when (selectedPlatform) {
-                    GamePlatform.Steam, GamePlatform.EpicGamesStore, GamePlatform.GogCom -> {
-                        if (gameVersion == ManorLordsGameVersion.V_0_8_029a)
-                            gameBinaryFile
-                        else
-                            gameLauncherFile
-                    }
+                    GamePlatform.Steam, GamePlatform.EpicGamesStore, GamePlatform.GogCom -> gameLauncherFile
                     GamePlatform.XboxPcGamePass -> gameLauncherFile
                 }
                 withContext(Dispatchers.IO) {
@@ -233,12 +228,7 @@ class LauncherScreenModel(
 
                     val process = runCatching {
                         val exe = when (selectedPlatform) {
-                            GamePlatform.Steam, GamePlatform.EpicGamesStore, GamePlatform.GogCom -> {
-                                if (gameVersion == ManorLordsGameVersion.V_0_8_029a)
-                                    gameBinaryFile
-                                else
-                                    gameLauncherFile
-                            }
+                            GamePlatform.Steam, GamePlatform.EpicGamesStore, GamePlatform.GogCom -> gameLauncherFile
                             GamePlatform.XboxPcGamePass -> gameLauncherFile
                         }
                         val processBuilder = ProcessBuilder("cmd.exe", "/c", "start", "", fs.absolute(exe).toString())

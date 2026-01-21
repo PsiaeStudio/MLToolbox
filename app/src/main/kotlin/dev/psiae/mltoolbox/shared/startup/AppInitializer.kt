@@ -13,7 +13,7 @@ import kotlinx.coroutines.Dispatchers
 
 object AppInitializer {
 
-    private fun getExecutablePath(): String {
+    fun getExecutablePath(): String {
         val path = ProcessHandle.current()
             .info()
             .command()

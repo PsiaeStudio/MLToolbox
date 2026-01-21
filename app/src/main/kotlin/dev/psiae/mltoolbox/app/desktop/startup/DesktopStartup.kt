@@ -34,6 +34,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
 import javax.swing.SwingUtilities
+import kotlin.io.path.exists
 import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.minutes
 
@@ -64,10 +65,10 @@ object DesktopStartup {
         return path
     }
 
-    private fun startedFromWinSys32Error(): Nothing {
+    private fun startedFromWinDirError(path: String): Nothing {
         try {
             DefaultExceptionWindow(
-                "Please start the app from its installation folder or use a Shortcut. Unsupported CWD (System32)",
+                "Please start the app from its installation folder or use a Shortcut. \n\nUnsupported CWD: $path",
                 null
             )
         } finally {
@@ -75,14 +76,21 @@ object DesktopStartup {
         }
     }
 
-    private fun nonWritableCWDError(): Nothing {
+    private fun nonWritableCWDError(path: String): Nothing {
         try {
-            DefaultExceptionWindow("App working directory is not writable", null)
+            DefaultExceptionWindow("App working directory is not writable: $path", null)
         } finally {
             exitProcess(1)
         }
     }
 
+    private fun customCWDNotSupportedError(path: String): Nothing {
+        try {
+            DefaultExceptionWindow("Custom App CWD is currently not supported: $path", null)
+        } finally {
+            exitProcess(1)
+        }
+    }
 
 
     private fun prepareAWTThread() {
@@ -238,17 +246,21 @@ object DesktopStartup {
         args: Array<String>,
     )  {
         val userDir = System.getProperty("user.dir")?.ifEmpty { null }
-            ?: throw RuntimeException("user.dir is empty")
+            ?: throw RuntimeException("user.dir is empty: ${System.getProperty("user.dir")}")
 
-        if (!jFile(userDir).exists())
-            throw RuntimeException("user.dir does not exist")
+        if (!Paths.get(userDir).exists())
+            throw RuntimeException("user.dir does not exist: $userDir")
 
-        // happen when you start the .exe from search bar
-        if (jFile(userDir) == jFile("C:\\Windows\\System32"))
-            startedFromWinSys32Error()
+        // happens when you start the .exe from search bar
+        if (Paths.get(userDir).startsWith("C:\\Windows\\"))
+            startedFromWinDirError(userDir)
 
-        if (!jFile(userDir).canWrite())
-            nonWritableCWDError()
+        if (!Files.isWritable(Paths.get(userDir)))
+            nonWritableCWDError(userDir)
+
+        // We don't allow custom CWD for now.
+        if (!Paths.get(userDir).startsWith(Paths.get(AppInitializer.getExecutablePath()).parent))
+            customCWDNotSupportedError(userDir)
 
         Logger.init(MLToolboxApp.logsDir.absolutePath)
 

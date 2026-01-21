@@ -79,6 +79,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.psiae.mltoolbox.core.catchOrRethrow
 import dev.psiae.mltoolbox.core.utils.ensureSuffix
+import dev.psiae.mltoolbox.foundation.fs.native.windows.WindowsPath
 import dev.psiae.mltoolbox.foundation.fs.path.Path
 import dev.psiae.mltoolbox.foundation.fs.path.Path.Companion.platformSlashSeparated
 import dev.psiae.mltoolbox.foundation.fs.path.Path.Companion.toFsPath
@@ -1180,7 +1181,7 @@ private fun GamePathFieldEdit(
             if (textStr.isBlank())
                 return@derivedStateOf false
             latestRequireStartsWith.isEmpty ||
-                textStr.toString().toPath().platformSlashSeparated().startsWith(latestRequireStartsWith.platformSlashSeparated())
+                textStr.toString().toPath(normalize = true).platformSlashSeparated().startsWith(latestRequireStartsWith.platformSlashSeparated())
         }
     }
     val latestRequireEndsWith by rememberUpdatedState(requireEndsWith)
@@ -1223,6 +1224,20 @@ private fun GamePathFieldEdit(
             }.catchOrRethrow { e ->
                 if (e is IOException)
                     return@LaunchedEffect
+            }
+        }
+    }
+    val isAbsolutePathType by remember {
+        derivedStateOf {
+            val text = textFieldState.text
+            val textStr = text.toString()
+            if (textStr.isBlank())
+                return@derivedStateOf false
+            val path = textStr.toPath()
+            if (!state.fs.isValidPath(path))
+                return@derivedStateOf false
+            WindowsPath(state.fs, textStr.toPath()).let {
+                it.isPathTypeAbsolute && path.platformSlashSeparated().toString() == it.normalized
             }
         }
     }
@@ -1329,6 +1344,18 @@ private fun GamePathFieldEdit(
                         overflow = TextOverflow.Ellipsis
                     )
                 }
+                Text(
+                    text = buildAnnotatedString {
+                        append("Is Absolute")
+                    },
+                    color = if (isAbsolutePathType)
+                        Material3Theme.colorScheme.onSurfaceVariant
+                    else
+                        Material3Theme.colorScheme.error,
+                    style = Material3Theme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
         }
     }
@@ -1644,8 +1671,7 @@ private fun SelectGameVersion(
                             modifier = Modifier.align(Alignment.CenterVertically),
                             text = when (state.selectedGameVersion) {
                                 is ManorLordsGameVersion.Custom -> "Custom"
-                                ManorLordsGameVersion.V_0_8_050-> "0.8.050 (Beta)"
-                                ManorLordsGameVersion.V_0_8_029a -> "0.8.029a"
+                                ManorLordsGameVersion.V_0_8_050-> "0.8.050"
                                 else -> state.selectedGameVersion?.versionStr ?: ""
                             },
                             color = Material3Theme.colorScheme.onSurface,
@@ -1669,40 +1695,19 @@ private fun SelectGameVersion(
                         Column(modifier = Modifier.padding(vertical = 4.dp)) {
                             when (val platform = state.selectedGamePlatformOrThrow()) {
                                 GamePlatform.Steam, GamePlatform.GogCom, GamePlatform.EpicGamesStore -> {
-                                    if (platform == GamePlatform.Steam) {
-                                        Row(
-                                            Modifier.height(48.dp)
-                                                .fillMaxWidth()
-                                                .clickable(state.selectedGameVersion != ManorLordsGameVersion.V_0_8_050) {
-                                                    state.selectGameVersion(ManorLordsGameVersion.V_0_8_050)
-                                                }
-                                                .then(if (state.selectedGameVersion == ManorLordsGameVersion.V_0_8_050) Modifier.background(
-                                                    Material3Theme.colorScheme.secondaryContainer) else Modifier)
-                                                .padding(horizontal = 12.dp)
-                                        ) {
-                                            Text(
-                                                modifier = Modifier.align(Alignment.CenterVertically),
-                                                text = "0.8.050 (Beta)",
-                                                color = Material3Theme.colorScheme.onSurface,
-                                                fontWeight = FontWeight.SemiBold,
-                                                style = Material3Theme.typography.labelLarge
-                                            )
-                                            Spacer(Modifier.weight(1f))
-                                        }
-                                    }
                                     Row(
                                         Modifier.height(48.dp)
                                             .fillMaxWidth()
-                                            .clickable(state.selectedGameVersion != ManorLordsGameVersion.V_0_8_029a) {
-                                                state.selectGameVersion(ManorLordsGameVersion.V_0_8_029a)
+                                            .clickable(state.selectedGameVersion != ManorLordsGameVersion.V_0_8_050) {
+                                                state.selectGameVersion(ManorLordsGameVersion.V_0_8_050)
                                             }
-                                            .then(if (state.selectedGameVersion == ManorLordsGameVersion.V_0_8_029a) Modifier.background(
+                                            .then(if (state.selectedGameVersion == ManorLordsGameVersion.V_0_8_050) Modifier.background(
                                                 Material3Theme.colorScheme.secondaryContainer) else Modifier)
                                             .padding(horizontal = 12.dp)
                                     ) {
                                         Text(
                                             modifier = Modifier.align(Alignment.CenterVertically),
-                                            text = "0.8.029a",
+                                            text = "0.8.050",
                                             color = Material3Theme.colorScheme.onSurface,
                                             fontWeight = FontWeight.SemiBold,
                                             style = Material3Theme.typography.labelLarge
@@ -1714,16 +1719,16 @@ private fun SelectGameVersion(
                                     Row(
                                         Modifier.height(48.dp)
                                             .fillMaxWidth()
-                                            .clickable(state.selectedGameVersion != ManorLordsGameVersion.V_0_8_032) {
-                                                state.selectGameVersion(ManorLordsGameVersion.V_0_8_032)
+                                            .clickable(state.selectedGameVersion != ManorLordsGameVersion.V_0_8_050) {
+                                                state.selectGameVersion(ManorLordsGameVersion.V_0_8_050)
                                             }
-                                            .then(if (state.selectedGameVersion == ManorLordsGameVersion.V_0_8_032) Modifier.background(
+                                            .then(if (state.selectedGameVersion == ManorLordsGameVersion.V_0_8_050) Modifier.background(
                                                 Material3Theme.colorScheme.secondaryContainer) else Modifier)
                                             .padding(horizontal = 12.dp)
                                     ) {
                                         Text(
                                             modifier = Modifier.align(Alignment.CenterVertically),
-                                            text = "0.8.032",
+                                            text = "0.8.050",
                                             color = Material3Theme.colorScheme.onSurface,
                                             fontWeight = FontWeight.SemiBold,
                                             style = Material3Theme.typography.labelLarge
@@ -1867,6 +1872,18 @@ fun GameCustomVersionFieldEdit(
                             append("Not blank")
                         },
                         color = if (validNotBlank)
+                            Material3Theme.colorScheme.onSurfaceVariant
+                        else
+                            Material3Theme.colorScheme.error,
+                        style = Material3Theme.typography.bodySmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = buildAnnotatedString {
+                            append("Not Yet Implemented")
+                        },
+                        color = if (false)
                             Material3Theme.colorScheme.onSurfaceVariant
                         else
                             Material3Theme.colorScheme.error,

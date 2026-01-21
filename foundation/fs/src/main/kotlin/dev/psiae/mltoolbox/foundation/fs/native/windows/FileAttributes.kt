@@ -5,7 +5,7 @@ import com.sun.jna.Native
 import com.sun.jna.Pointer
 import com.sun.jna.platform.win32.WinNT
 import com.sun.jna.win32.W32APIOptions
-import dev.psiae.mltoolbox.foundation.fs.NoSuchFileException
+import dev.psiae.mltoolbox.foundation.fs.internal.path.isAbsolute
 import dev.psiae.mltoolbox.foundation.fs.path.Path
 import dev.psiae.mltoolbox.foundation.fs.path.backslashSeparatorsPathString
 import java.io.IOException
@@ -40,29 +40,34 @@ internal object WindowsNativeFileAttributes {
 
     private val INVALID_HANDLE = WinNT.HANDLE(Pointer.createConstant(-1L))
 
-
     @Throws(IOException::class)
-    fun checkCanWriteAttributes(path: Path) {
-        val handle = kernel32.CreateFileW(
-            path.backslashSeparatorsPathString,
-            FILE_WRITE_ATTRIBUTES,
-            FILE_SHARE_ALL,
-            null,
-            OPEN_EXISTING,
-            0,
-            null
-        )
+    fun checkCanWriteAttributes(
+        path: WindowsPath
+    ) {
+        try {
+            val handle = kernel32.CreateFileW(
+                path.pathForWin32Calls(),
+                FILE_WRITE_ATTRIBUTES,
+                FILE_SHARE_ALL,
+                null,
+                OPEN_EXISTING,
+                0,
+                null
+            )
 
-        if (handle == INVALID_HANDLE) {
-            throw Win32Errors.translateToFsException(path, null, Native.getLastError())
+            if (handle == INVALID_HANDLE) {
+                throw Win32Errors.translateToFsException(path, null, Native.getLastError())
+            }
+
+            kernel32.CloseHandle(handle)
+        } catch (w: WindowsException) {
+            throw Win32Errors.translateToFsException(path, null, w.lastError())
         }
-
-        kernel32.CloseHandle(handle)
     }
 
     @Throws(IOException::class)
-    fun writeSameAttributes(path: Path): Boolean {
-        val lpFileName = path.backslashSeparatorsPathString
+    fun writeSameAttributes(path: WindowsPath): Boolean {
+        val lpFileName = path.pathForWin32Calls()
         return kernel32.SetFileAttributesW(
             lpFileName,
             kernel32.GetFileAttributesW(lpFileName)

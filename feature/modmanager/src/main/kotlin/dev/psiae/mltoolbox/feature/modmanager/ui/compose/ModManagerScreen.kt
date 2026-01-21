@@ -41,7 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import dev.psiae.mltoolbox.feature.modmanager.ui.browsemods.BrowseModsScreen
-import dev.psiae.mltoolbox.feature.modmanager.ui.compose.manageplayset.ManagePlaylistScreen
+import dev.psiae.mltoolbox.feature.modmanager.ui.compose.manageplayset.ManagePlaysetScreen
 import dev.psiae.mltoolbox.feature.modmanager.ui.compose.setup.SetupModManagerScreen
 import dev.psiae.mltoolbox.feature.modmanager.ui.dashboard.DashboardScreen
 import dev.psiae.mltoolbox.feature.modmanager.ui.launcher.LauncherScreen
@@ -86,7 +86,7 @@ fun ModManagerScreen() {
                                 DashboardScreen.name -> DashboardScreen(screenState)
                                 LauncherScreen.name -> LauncherScreen(screenState)
                                 ManageModsScreen.name -> ManageModsScreen(screenState)
-                                ManagePlaysetScreen.name -> ManagePlaylistScreen(screenState)
+                                ManagePlaysetScreen.name -> ManagePlaysetScreen(screenState)
                                 else -> WIPScreen()
                             }
                         }

@@ -4,7 +4,6 @@ import dev.psiae.mltoolbox.foundation.fs.AccessDeniedException
 import dev.psiae.mltoolbox.foundation.fs.FileAlreadyExistsException
 import dev.psiae.mltoolbox.foundation.fs.FileSystemException
 import dev.psiae.mltoolbox.foundation.fs.NoSuchFileException
-import dev.psiae.mltoolbox.foundation.fs.path.Path
 
 internal object Win32Errors {
     const val ERROR_FILE_NOT_FOUND: Int = 2
@@ -33,13 +32,13 @@ internal object Win32Errors {
     const val ERROR_INVALID_REPARSE_DATA: Int = 4392
 
     fun translateToFsException(
-        path: Path,
-        otherPath: Path?,
+        path: WindowsPath,
+        otherPath: WindowsPath?,
         errorCode: Int,
     ): FileSystemException = when (errorCode) {
-        ERROR_FILE_NOT_FOUND, ERROR_PATH_NOT_FOUND -> NoSuchFileException(path, otherPath)
-        ERROR_FILE_EXISTS, ERROR_ALREADY_EXISTS -> FileAlreadyExistsException(path, otherPath)
-        ERROR_ACCESS_DENIED -> AccessDeniedException(path, otherPath)
-        else -> FileSystemException(path, otherPath)
+        ERROR_FILE_NOT_FOUND, ERROR_PATH_NOT_FOUND -> NoSuchFileException(path.path, otherPath?.path)
+        ERROR_FILE_EXISTS, ERROR_ALREADY_EXISTS -> FileAlreadyExistsException(path.path, otherPath?.path)
+        ERROR_ACCESS_DENIED -> AccessDeniedException(path.path, otherPath?.path)
+        else -> FileSystemException(path.path, otherPath?.path)
     }
 }

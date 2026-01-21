@@ -9,15 +9,15 @@ import androidx.compose.ui.Modifier
 import dev.psiae.mltoolbox.feature.modmanager.ui.compose.ModManagerScreenState
 
 @Composable
-internal fun ManagePlaylistScreen(
-    modManagerScreenModel: ModManagerScreenState
+internal fun ManagePlaysetScreen(
+    modManagerScreenState: ModManagerScreenState
 ) {
-    val model = rememberManagePlaysetScreenModel(modManagerScreenModel)
-    ManagePlaylistScreen(model)
+    val model = rememberManagePlaysetScreenModel(modManagerScreenState)
+    ManagePlaysetScreen(model)
 }
 
 @Composable
-private fun ManagePlaylistScreen(
+private fun ManagePlaysetScreen(
     screenModel: ManagePlaysetScreenModel
 ) {
     Surface(

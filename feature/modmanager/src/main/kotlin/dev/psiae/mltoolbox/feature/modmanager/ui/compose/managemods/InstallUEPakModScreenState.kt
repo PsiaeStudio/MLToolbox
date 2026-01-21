@@ -268,7 +268,7 @@ class InstallUEPakModScreenState(
                 }
 
                 val listExtractDirectory = fs.list(extractDirPath).filter {
-                    fs.file().isDirectory()
+                    fs.file().isDirectory(followLinks = true)
                 }
                 if (listExtractDirectory.isEmpty()) {
                     errorStatusMessage = "ue_pak_mods_install folder is empty"
@@ -281,8 +281,8 @@ class InstallUEPakModScreenState(
                     val listFiles = fs.list(folderPath)
                     if (listFiles.isEmpty() ||
                         run {
-                            val singleDir = listFiles.filter { fs.file(it).isDirectory() }.size == 1
-                            val singleFile = listFiles.filter { fs.file(it).isRegularFile() }.size == 1
+                            val singleDir = listFiles.filter { fs.file(it).isDirectory(followLinks = true) }.size == 1
+                            val singleFile = listFiles.filter { fs.file(it).isRegularFile(followLinks = true) }.size == 1
                             !(singleFile xor singleDir)
                         }
 
@@ -293,7 +293,7 @@ class InstallUEPakModScreenState(
 
                     val file = run {
                         val root = listFiles.first()
-                        if (fs.file(root).isRegularFile())
+                        if (fs.file(root).isRegularFile(followLinks = true))
                             return@run root
                         val rootFiles = fs.list(root)
                         if (rootFiles.isEmpty() || rootFiles.size > 1) {
@@ -321,7 +321,7 @@ class InstallUEPakModScreenState(
 
 
                 val paksDirPath = model.gameContext.paths.paks
-                if (!fs.file(paksDirPath).followLinks().isDirectory()) {
+                if (!fs.file(paksDirPath).isDirectory(followLinks = true)) {
                     errorStatusMessage = "missing 'Paks' directory"
                     return@runInterruptible false
                 }
@@ -343,7 +343,7 @@ class InstallUEPakModScreenState(
                 }
 
                 if (fs.file(modsDirPath).exists()) {
-                    if (!fs.file(modsDirPath).followLinks().isDirectory()) {
+                    if (!fs.file(modsDirPath).isDirectory(followLinks = true)) {
                         if (!fs.file(modsDirPath).canDeleteRecursively()) {
                             errorStatusMessage = "Unable to lock file for deletion: '~mods'"
                             return@runInterruptible false
@@ -386,8 +386,6 @@ class InstallUEPakModScreenState(
                 }
             }.getOrThrow() }
         }
-
-
 
 
         updateState { state ->
